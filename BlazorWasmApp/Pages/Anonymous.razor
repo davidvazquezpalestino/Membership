@@ -1,0 +1,13 @@
+﻿@page "/anonymous"
+
+@inject WebApiClient Client
+
+@Message
+
+@code {
+    string Message;
+    protected override async Task OnInitializedAsync()
+    {
+        Message = await Client.GetAnonymousMessage();
+    }
+}

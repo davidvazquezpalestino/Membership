@@ -1,0 +1,26 @@
+﻿using Membership.Shared.ValueObjects;
+
+namespace Membership.Abstractions.Exceptions;
+public class RegisterUserException : Exception
+{
+    public IEnumerable<MembershipError> Errors { get; }
+    public RegisterUserException()
+    {
+    }
+
+    public RegisterUserException(string message) : base(message)
+    {
+    }
+
+    public RegisterUserException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+
+    // TODO: 4o constructor
+
+    public RegisterUserException(IEnumerable<MembershipError> errors) :
+        base(string.Join("\n", errors))
+    {
+        Errors = errors;
+    }
+}

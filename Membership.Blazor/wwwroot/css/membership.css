@@ -1,0 +1,25 @@
+﻿.form-field-column{
+    display:flex;
+    flex-direction:column;
+    margin: 1rem 0.5rem;
+}
+
+.form-field-column > div{
+    flex-grow:1;
+}
+
+    .form-field-column > label {
+        width: auto;
+    }
+
+    .form-field-column input{
+        width:100%;
+    }
+
+.invalid{
+    outline: 1px solid red;
+}
+
+.validation-message{
+    color:red;
+}

@@ -1,0 +1,10 @@
+global using BlazorWasmApp;
+global using Microsoft.AspNetCore.Components.Web;
+global using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+global using Membership.Blazor;
+global using Membership.Blazor.Options;
+global using Membership.Shared.MessageLocalizer;
+global using Membership.Shared.Validators;
+global using BlazorWasmApp.Gateways;
+global using Membership.Blazor.HttpMessageHandlers;
+global using Membership.Shared.OAuth;

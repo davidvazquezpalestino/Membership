@@ -1,0 +1,46 @@
+﻿
+<EditForm Model="User" OnValidSubmit="Register">
+    <MembershipValidator Validator="UserValidator"
+        @ref=MembershipValidator/>
+
+    <div class="form-field-column">
+        <label>@Localizer[MessageKeys.DisplayFirstNameMessage]</label>
+        <div>
+            <InputText @bind-Value=User.FirstName/>
+            <ValidationMessage For="@(() => User.FirstName)"/>
+        </div>
+    </div>
+    <div class="form-field-column">
+        <label>@Localizer[MessageKeys.DisplayLastNameMessage]</label>
+        <div>
+            <InputText @bind-Value=User.LastName />
+            <ValidationMessage For="@(() => User.LastName)" />
+        </div>
+    </div>
+    <div class="form-field-column">
+        <label>@Localizer[MessageKeys.DisplayEmailMessage]</label>
+        <div>
+            <InputText @bind-Value=User.Email />
+            <ValidationMessage For="@(() => User.Email)" />
+        </div>
+    </div>
+    <div class="form-field-column">
+        <label>@Localizer[MessageKeys.DisplayPasswordMessage]</label>
+        <div>
+            <InputText @bind-Value=User.Password type="password"/>
+            <ValidationMessage For="@(() => User.Password)" />
+        </div>
+    </div>
+    <div class="form-field-column">
+        <label>@Localizer[MessageKeys.DisplayConfirmPasswordMessage]</label>
+        <div>
+            <InputText @bind-Value=User.ConfirmPassword type="password" />
+            <ValidationMessage For="@(() => User.ConfirmPassword)" />
+        </div>
+    </div>
+    <div class="form-field-column">
+        <button class="btn btn-primary">
+            @Localizer[MessageKeys.DisplayRegisterButtonMessage]
+        </button>
+    </div>
+</EditForm>

@@ -1,0 +1,14 @@
+﻿@attribute [Route(RouteTemplate)]
+
+<div class="d-flex justify-content-evenly mt-5">
+<div>
+    <h4>Iniciar sesión</h4>
+    <LoginComponent OnLogin="OnLogin"/>
+</div>
+    <div>
+        <h4 class="mb-4">Iniciar sesión con una cuenta de usuario de</h4>
+        <ExternalIDPsButtons ScopeAction=Membership.Blazor.Enums.ScopeAction.Login
+        ReturnUri="@GetReturnUri()"/>
+    </div>
+</div>
+

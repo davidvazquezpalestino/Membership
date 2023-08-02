@@ -1,0 +1,24 @@
+﻿@page "/oauth2/callback"
+@inherits ExternalCallbackEndpointBase
+
+@if(!string.IsNullOrWhiteSpace(Message))
+{
+    <div class="alert alert-danger">
+        <div>
+            @Message
+        </div>
+        @if(Errors != null)
+        {
+            <ul>
+                @foreach(var Error in Errors)
+                {
+                    <li>
+                        @Error.Description
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+}
+
+
