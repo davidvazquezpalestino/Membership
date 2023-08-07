@@ -14,9 +14,9 @@ internal class UserWebApiGateway : IUserWebApiGateway
 
     public async Task<UserTokensDto> LoginAsync(UserCredentialsDto userCredentials)
     {
-        var Response = await Client.PostAsJsonAsync(
+        HttpResponseMessage response = await Client.PostAsJsonAsync(
             Options.Login, userCredentials);
-        return await Response.Content.ReadFromJsonAsync<UserTokensDto>();
+        return await response.Content.ReadFromJsonAsync<UserTokensDto>();
     }
 
     public async Task LogoutAsync(UserTokensDto userTokens)
@@ -26,9 +26,9 @@ internal class UserWebApiGateway : IUserWebApiGateway
 
     public async Task<UserTokensDto> RefreshTokenAsync(UserTokensDto userTokens)
     {
-        var Response = await Client.PostAsJsonAsync(
+        HttpResponseMessage response = await Client.PostAsJsonAsync(
             Options.RefreshToken, userTokens);
-        return await Response.Content.ReadFromJsonAsync<UserTokensDto>();
+        return await response.Content.ReadFromJsonAsync<UserTokensDto>();
     }
 
     public async Task RegisterUserAsync(UserDto user)

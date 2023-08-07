@@ -16,6 +16,6 @@ internal class UserService : IUserService
 
     public string FullName =>
         Context.HttpContext.User.Claims
-        .Where(c => c.Type == "FullName")
-        .Select(c => c.Value).FirstOrDefault();
+        .Where(claim => claim.Type == "FullName")
+        .Select(claim => claim.Value).FirstOrDefault();
 }

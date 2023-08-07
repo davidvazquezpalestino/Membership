@@ -1,22 +1,22 @@
 ﻿namespace Membership.Blazor.Services;
 internal class OAuthStateService : IOAuthStateService
 {
-    readonly IJSRuntime JSRuntime;
+    readonly IJSRuntime JsRuntime;
 
     public OAuthStateService(IJSRuntime jSRuntime)
     {
-        JSRuntime = jSRuntime;
+        JsRuntime = jSRuntime;
     }
 
     public async Task SetAsync<T>(string key, T value)
     {
         try
         {
-            var SerializedValue = JsonSerializer.Serialize(value);
-            var ValueToSave =
-                Convert.ToBase64String(Encoding.UTF8.GetBytes(SerializedValue));
-            await JSRuntime.InvokeVoidAsync("sessionStorage.setItem",
-                key, ValueToSave);
+            string serializedValue = JsonSerializer.Serialize(value);
+            string valueToSave =
+                Convert.ToBase64String(Encoding.UTF8.GetBytes(serializedValue));
+            await JsRuntime.InvokeVoidAsync("sessionStorage.setItem",
+                key, valueToSave);
         }
         catch (Exception ex)
         {
@@ -26,25 +26,25 @@ internal class OAuthStateService : IOAuthStateService
 
     public async Task<T> GetAsync<T>(string key)
     {
-        T Value = default;
+        T value = default;
         try
         {
-            var SavedValue = await JSRuntime.InvokeAsync<string>(
+            string savedValue = await JsRuntime.InvokeAsync<string>(
                 "sessionStorage.getItem", key);
-            if (SavedValue != null)
+            if (savedValue != null)
             {
-                var SerializedValue =
-                    Encoding.UTF8.GetString(Convert.FromBase64String(SavedValue));
-                Value = JsonSerializer.Deserialize<T>(SerializedValue);
+                string serializedValue =
+                    Encoding.UTF8.GetString(Convert.FromBase64String(savedValue));
+                value = JsonSerializer.Deserialize<T>(serializedValue);
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
         }
-        return Value;
+        return value;
     }
 
     public async Task RemoveAsync(string key) =>
-        await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", key);
+        await JsRuntime.InvokeVoidAsync("sessionStorage.removeItem", key);
 }

@@ -13,10 +13,10 @@ internal class RegisterInteractor : IRegisterInputPort
 
     public async Task RegisterAsync(UserDto user)
     {
-        var ValidationErrors = Validator.Validate(user);
-        if (ValidationErrors != null && ValidationErrors.Any())
+        IEnumerable<MembershipError> validationErrors = Validator.Validate(user).ToList();
+        if (validationErrors != null && validationErrors.Any())
         {
-            throw new RegisterUserException(ValidationErrors);
+            throw new RegisterUserException(validationErrors);
         }
         await UserManagerService.ThrowIfUnableToRegisterUserAsync(user);
     }

@@ -20,40 +20,44 @@ internal class TokenService
 
     public async Task<TokenServiceResponse> GetTokensAsync(string state, string code)
     {
-        TokenServiceResponse Result;
-
         if (code == null || state == null)
+        {
             throw new Exception(
                 Localizer[MessageKeys.MissingAuthorizeCallbackParameters]);
+        }
 
-        var StateInfo = await StateService.GetAsync<StateInfo>(state);
+        StateInfo stateInfo = await StateService.GetAsync<StateInfo>(state);
 
-        if (StateInfo == null)
-            throw new Exception(Localizer[MessageKeys.InvalidStateValue]);
-
-        var RequestBody = OAuthService.BuildTokenRequestBody(
-            new TokenRequestInfo(code, AppOptions.Value.RedirectUri,
-            AppOptions.Value.ClientId, StateInfo.Scope, StateInfo.CodeVerifier, null));
-
-        var Response =
-            await Client.PostAsync(AppOptions.Value.TokenEndpoint, RequestBody);
-
-        var Tokens = await Response.Content.ReadFromJsonAsync<UserTokensDto>();
-        var JwtToken = new JwtSecurityTokenHandler()
-            .ReadJwtToken(Tokens.AccessToken);
-        var TokenNonce = JwtToken.Claims.FirstOrDefault(c => c.Type == "nonce")?.Value;
-        if (TokenNonce == null || TokenNonce != StateInfo.Nonce)
-            throw new Exception(Localizer[MessageKeys.InvalidNonceValue]);
-
-        Result = new()
+        if (stateInfo == null)
         {
-            Tokens = Tokens,
-            ReturnUri = StateInfo.ReturnUri,
-            Scope = StateInfo.Scope
+            throw new Exception(Localizer[MessageKeys.InvalidStateValue]);
+        }
+
+        FormUrlEncodedContent requestBody = OAuthService.BuildTokenRequestBody(
+            new TokenRequestInfo(code, AppOptions.Value.RedirectUri,
+            AppOptions.Value.ClientId, stateInfo.Scope, stateInfo.CodeVerifier, null));
+
+        HttpResponseMessage response =
+            await Client.PostAsync(AppOptions.Value.TokenEndpoint, requestBody);
+
+        UserTokensDto tokens = await response.Content.ReadFromJsonAsync<UserTokensDto>();
+        JwtSecurityToken jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(tokens.AccessToken);
+        
+        string tokenNonce = jwtToken.Claims.FirstOrDefault(c => c.Type == "nonce")?.Value;
+        if (tokenNonce == null || tokenNonce != stateInfo.Nonce)
+        {
+            throw new Exception(Localizer[MessageKeys.InvalidNonceValue]);
+        }
+
+        TokenServiceResponse result = new()
+        {
+            Tokens = tokens,
+            ReturnUri = stateInfo.ReturnUri,
+            Scope = stateInfo.Scope
         };
 
         await StateService.RemoveAsync(state);
 
-        return Result;
+        return result;
     }
 }

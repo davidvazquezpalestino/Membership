@@ -8,6 +8,8 @@ public interface IUserService
     void ThrowIfNotIsAuthenticated()
     {
         if (!IsAuthenticated)
+        {
             throw new UnauthorizedAccessException();
+        }
     }
 }

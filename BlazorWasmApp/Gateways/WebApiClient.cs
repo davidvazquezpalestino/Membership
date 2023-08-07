@@ -1,15 +1,9 @@
-﻿using System.Net.Http.Json;
-
-namespace BlazorWasmApp.Gateways;
+﻿namespace BlazorWasmApp.Gateways;
 
 public class WebApiClient
 {
     readonly HttpClient Client;
-
-    public WebApiClient(HttpClient client)
-    {
-        Client = client;
-    }
+    public WebApiClient(HttpClient client) => Client = client;
 
     public async Task<string> GetAnonymousMessage() =>
         await Client.GetFromJsonAsync<string>("anonymous");

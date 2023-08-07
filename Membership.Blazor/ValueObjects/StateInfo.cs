@@ -7,8 +7,7 @@ internal class StateInfo
     public string Scope { get; }
     public string ReturnUri { get; }
 
-    public StateInfo(string state, string codeVerifier, string nonce,
-        string scope, string returnUri)
+    public StateInfo(string state, string codeVerifier, string nonce, string scope, string returnUri)
     {
         State = state;
         CodeVerifier = codeVerifier;

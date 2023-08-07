@@ -11,11 +11,10 @@ internal class BearerTokenHandler : DelegatingHandler
     protected override async Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var StoredTokens = await Provider.GetUserTokensAsync();
-        if (StoredTokens != null)
+        UserTokensDto storedTokens = await Provider.GetUserTokensAsync();
+        if (storedTokens != null)
         {
-            request.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", StoredTokens.AccessToken);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", storedTokens.AccessToken);
         }
 
         return await base.SendAsync(request, cancellationToken);

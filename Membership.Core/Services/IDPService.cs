@@ -17,85 +17,81 @@ internal class IDPService : IIDPService
         Logger = logger;
     }
 
-    public Task<string> GetAuthorizeRequestUri(
-        string providerId, string state, string codeVerifier, string nonce)
+    public Task<string> GetAuthorizeRequestUri(string providerId, string state, string codeVerifier, string nonce)
     {
-        string Result = null;
+        string result = null;
 
-        var Info = ClientIDPInfoOptions.IDPClients.FirstOrDefault(
-            p => p.ProviderId == providerId);
+        IDPClientInfo info = ClientIDPInfoOptions.IDPClients.FirstOrDefault(
+            clientInfo => clientInfo.ProviderId == providerId);
 
-        if (Info != null)
+        if (info != null)
         {
-            string CodeChallenge;
-            string CodeChallengeMethod;
-            if (Info.SupportsS256CodeChallengeMethod)
+            string codeChallenge;
+            string codeChallengeMethod;
+            if (info.SupportsS256CodeChallengeMethod)
             {
-                CodeChallenge = OAuthService.GetHash256CodeChallenge(codeVerifier);
-                CodeChallengeMethod = OAuthService.CodeChallengeMethodSha256;
+                codeChallenge = OAuthService.GetHash256CodeChallenge(codeVerifier);
+                codeChallengeMethod = OAuthService.CodeChallengeMethodSha256;
             }
             else
             {
-                CodeChallenge = codeVerifier;
-                CodeChallengeMethod = OAuthService.CodeChallengeMethodPlain;
+                codeChallenge = codeVerifier;
+                codeChallengeMethod = OAuthService.CodeChallengeMethodPlain;
             }
 
-            AuthorizeRequestInfo RequestInfo = new(Info.AuthorizeEndpoint,
-                Info.ClientId, Info.RedirectUri, state, Info.Scope,
-                CodeChallenge,
-                CodeChallengeMethod, nonce);
+            AuthorizeRequestInfo requestInfo = new(info.AuthorizeEndpoint,
+                info.ClientId, info.RedirectUri, state, info.Scope,
+                codeChallenge,
+                codeChallengeMethod, nonce);
 
-            Result = OAuthService.BuildAuthorizeRequestUri(RequestInfo);
+            result = OAuthService.BuildAuthorizeRequestUri(requestInfo);
         }
-        return Task.FromResult(Result);
+        return Task.FromResult(result);
     }
 
-    public async Task<IDPTokens> GetTokensAsync(string providerId,
-        string authorizationCode,
-        string codeVerifier, string nonce)
+    public async Task<IDPTokens> GetTokensAsync(string providerId, string authorizationCode, string codeVerifier, string nonce)
     {
-        IDPTokens Tokens = null;
-        var Info = ClientIDPInfoOptions.IDPClients.FirstOrDefault(
-            p => p.ProviderId == providerId);
+        IDPTokens tokens = null;
+        IDPClientInfo info = ClientIDPInfoOptions.IDPClients.FirstOrDefault(clientInfo => clientInfo.ProviderId == providerId);
 
-        var RequestBody = OAuthService.BuildTokenRequestBody(
-            new TokenRequestInfo(
-            authorizationCode, Info.RedirectUri, Info.ClientId, Info.Scope,
-            codeVerifier, Info.ClientSecret));
+        FormUrlEncodedContent requestBody = OAuthService.BuildTokenRequestBody(
+            new TokenRequestInfo(authorizationCode, info.RedirectUri, info.ClientId, info.Scope, codeVerifier, info.ClientSecret));
 
-        var Response = await Client.PostAsync(Info.TokenEndpoint, RequestBody);
-        var JsonContentResponse =
-            await Response.Content.ReadFromJsonAsync<JsonElement>();
+        HttpResponseMessage response = await Client.PostAsync(info.TokenEndpoint, requestBody);
+        JsonElement jsonContentResponse =
+            await response.Content.ReadFromJsonAsync<JsonElement>();
 
-        if (Response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode)
         {
-            if (JsonContentResponse.TryGetProperty("id_token",
+            if (jsonContentResponse.TryGetProperty("id_token",
                 out JsonElement idTokenJson))
             {
-                string IdTokenToVerify = idTokenJson.ToString();
+                string idTokenToVerify = idTokenJson.ToString();
                 // Requiere el paquete NuGet: System.IdentityModel.Tokens.Jwt
-                var Handler = new JwtSecurityTokenHandler();
-                var JwtToken = Handler.ReadJwtToken(IdTokenToVerify);
-                var IdTokenNonce = JwtToken.Claims.FirstOrDefault(
-                    c => c.Type == "nonce")?.Value;
-                if (IdTokenNonce != null && IdTokenNonce == nonce)
+                JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+                JwtSecurityToken jwtToken = handler.ReadJwtToken(idTokenToVerify);
+                string idTokenNonce = jwtToken.Claims.FirstOrDefault(claim => claim.Type == "nonce")?.Value;
+
+                if (idTokenNonce != null && idTokenNonce == nonce)
                 {
-                    Tokens = new()
+                    tokens = new()
                     {
-                        IdToken = IdTokenToVerify
+                        IdToken = idTokenToVerify
                     };
 
-                    if (JsonContentResponse.TryGetProperty("access_token",
+                    if (jsonContentResponse.TryGetProperty("access_token",
                         out JsonElement accessTokenJson))
-                        Tokens.AccessToken = accessTokenJson.ToString();
+                    {
+                        tokens.AccessToken = accessTokenJson.ToString();
+                    }
                 }
             }
         }
         else
         {
-            Logger.LogError("{content}", JsonContentResponse.GetRawText());
+            Logger.LogError("{content}", jsonContentResponse.GetRawText());
         }
-        return Tokens;
+        return tokens;
     }
 }
 

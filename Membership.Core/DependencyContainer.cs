@@ -5,18 +5,16 @@ public static class DependencyContainer
         this IServiceCollection services,
         Action<JwtOptions> jwtOptionsSetter,
         Action<AppClientInfoOptions> appClientInfoOptionsSetter,
-        Action<IDPClientInfoOptions> iDPClientInfoOptionsSetter)
+        Action<IDPClientInfoOptions> idpClientInfoOptionsSetter)
     {
         services.AddMembershipInteractors()
             .AddMembershipPresenters()
-            .AddMembershipInternalServices(jwtOptionsSetter,
-            appClientInfoOptionsSetter, iDPClientInfoOptionsSetter)
+            .AddMembershipInternalServices(jwtOptionsSetter, appClientInfoOptionsSetter, idpClientInfoOptionsSetter)
             .AddOAuthService();
 
         return services;
     }
 
-    public static WebApplication UseMembershipEndpoints(this WebApplication app) =>
-        app.UseMembershipControllers();
+    public static WebApplication UseMembershipEndpoints(this WebApplication app) => app.UseMembershipControllers();
 }
 

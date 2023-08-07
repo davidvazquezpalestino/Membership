@@ -7,8 +7,7 @@ public partial class ExternalCallbackEndpoint : ExternalCallbackEndpointBase
 {
     string Message;
     IEnumerable<MembershipError> Errors;
-    protected override void OnError(string message,
-        IEnumerable<MembershipError> errors)
+    protected override void OnError(string message, IEnumerable<MembershipError> errors)
     {
         Message = message;
         Errors = errors;

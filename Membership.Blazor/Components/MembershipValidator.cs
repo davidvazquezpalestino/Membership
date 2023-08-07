@@ -13,9 +13,9 @@ public class MembershipValidator<T> : ComponentBase
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
-        EditContext PreviousEditContext = EditContext;
+        EditContext previousEditContext = EditContext;
         await base.SetParametersAsync(parameters);
-        if (EditContext != PreviousEditContext)
+        if (EditContext != previousEditContext)
         {
             ValidationMessageStore = new ValidationMessageStore(EditContext);
             EditContext.OnValidationRequested += ValidationRequested;
@@ -25,13 +25,12 @@ public class MembershipValidator<T> : ComponentBase
 
     void HandleErrors(object model, IEnumerable<MembershipError> errors)
     {
-        if (errors != null && errors.Any())
+        List<MembershipError> membershipErrors = errors.ToList();
+        if (membershipErrors.Any())
         {
-            foreach (var Error in errors)
+            foreach (MembershipError error in membershipErrors)
             {
-                ValidationMessageStore.Add(
-                    new FieldIdentifier(model, Error.Code),
-                    Error.Description);
+                ValidationMessageStore.Add(new FieldIdentifier(model, error.Code), error.Description);
             }
         }
     }
@@ -39,33 +38,30 @@ public class MembershipValidator<T> : ComponentBase
     void ValidationRequested(object sender, ValidationRequestedEventArgs e)
     {
         ValidationMessageStore.Clear();
-        var Result = Validator.Validate((T)EditContext.Model);
-        HandleErrors(EditContext.Model, Result);
+        IEnumerable<MembershipError> result = Validator.Validate((T)EditContext.Model);
+        HandleErrors(EditContext.Model, result);
     }
 
     void FieldChanged(object sender, FieldChangedEventArgs e)
     {
-        FieldIdentifier FieldIdentifier = e.FieldIdentifier;
-        ValidationMessageStore.Clear(FieldIdentifier);
-        var Result =
-            Validator.ValidateProperty((T)FieldIdentifier.Model,
-            FieldIdentifier.FieldName);
-        HandleErrors(FieldIdentifier.Model, Result);
+        FieldIdentifier fieldIdentifier = e.FieldIdentifier;
+        ValidationMessageStore.Clear(fieldIdentifier);
+        IEnumerable<MembershipError> result = Validator.ValidateProperty((T)fieldIdentifier.Model, fieldIdentifier.FieldName);
+        HandleErrors(fieldIdentifier.Model, result);
     }
 
     public void TrySetErrorsFromHttpRequestException(HttpRequestException ex)
     {
         if (ex.Data.Contains("Errors"))
         {
-            IEnumerable<MembershipError> Errors = ex.Data["Errors"] as
-                IEnumerable<MembershipError>;
-            if (Errors != null && Errors.Any())
+            IEnumerable<MembershipError> errors = (List<MembershipError>)ex.Data["Errors"];
+            
+            if (errors != null && errors.Any())
             {
                 ValidationMessageStore.Clear();
-                HandleErrors(EditContext.Model, Errors);
+                HandleErrors(EditContext.Model, errors);
                 EditContext.NotifyValidationStateChanged();
             }
         }
     }
-
 }

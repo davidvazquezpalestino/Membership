@@ -15,10 +15,11 @@ internal class LoginPresenter : ILoginOutputPort
 
     public async Task HandleUserEntityAsync(UserEntity user)
     {
-        string AccessToken =
+        string accessToken =
             await AccessTokenService.GetNewUserAccessTokenAsync(user);
-        string RefreshToken =
-            await RefreshTokenService.GetRefreshTokenForAccessTokenAsync(AccessToken);
-        UserTokens = new UserTokensDto(AccessToken, RefreshToken);
+       
+        string refreshToken =
+            await RefreshTokenService.GetRefreshTokenForAccessTokenAsync(accessToken);
+        UserTokens = new UserTokensDto(accessToken, refreshToken);
     }
 }

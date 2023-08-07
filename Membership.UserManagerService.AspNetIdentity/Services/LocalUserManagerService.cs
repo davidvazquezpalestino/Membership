@@ -1,40 +1,35 @@
-﻿using Membership.Shared.ValueObjects;
-
-namespace Membership.UserManagerService.AspNetIdentity.Services;
+﻿namespace Membership.UserManagerService.AspNetIdentity.Services;
 internal partial class UserManagerService
 {
-    public async Task<IEnumerable<MembershipError>> RegisterUserAsync(UserDto user)
+    public async Task<IEnumerable<MembershipError>> RegisterUserAsync(UserDto userDto)
     {
-        IEnumerable<MembershipError> Errors = null;
+        IEnumerable<MembershipError> errors = null;
 
-        var User = new User
+        User user = new User
         {
-            UserName = user.Email,
-            Email = user.Email,
-            FirstName = user.FirstName,
-            LastName = user.LastName
+            UserName = userDto.Email,
+            Email = userDto.Email,
+            FirstName = userDto.FirstName,
+            LastName = userDto.LastName
         };
 
-        var Result = await UserManager.CreateAsync(User, user.Password);
-        if (!Result.Succeeded)
+        IdentityResult result = await UserManager.CreateAsync(user, userDto.Password);
+        if (!result.Succeeded)
         {
-            Errors = ErrorsHandler.Handle(Result.Errors);
+            errors = ErrorsHandler.Handle(result.Errors);
         }
 
-        return Errors;
+        return errors;
     }
 
-    public async Task<UserEntity> GetUserByCredentialsAsync(
-        UserCredentialsDto userCredentials)
+    public async Task<UserEntity> GetUserByCredentialsAsync(UserCredentialsDto userCredentials)
     {
-        UserEntity FoundUser = default;
-        var User = await UserManager.FindByNameAsync(userCredentials.Email);
-        if (User != null &&
-            await UserManager.CheckPasswordAsync(User, userCredentials.Password))
+        UserEntity foundUser = default;
+        User user = await UserManager.FindByNameAsync(userCredentials.Email);
+        if (user != null && await UserManager.CheckPasswordAsync(user, userCredentials.Password))
         {
-            FoundUser = new UserEntity(User.UserName,
-                User.FirstName, User.LastName);
+            foundUser = new UserEntity(user.UserName, user.FirstName, user.LastName);
         }
-        return FoundUser;
+        return foundUser;
     }
 }

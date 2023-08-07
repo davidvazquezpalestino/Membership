@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.Claims;
 
 namespace Membership.Blazor.AuthenticationStateProviders;
 internal class JWTAuthenticationStateProvider : AuthenticationStateProvider,
@@ -22,46 +16,46 @@ internal class JWTAuthenticationStateProvider : AuthenticationStateProvider,
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        ClaimsIdentity Identity = new ClaimsIdentity();
+        ClaimsIdentity claimsIdentity = new ClaimsIdentity();
 
-        var StoredTokens = await GetUserTokensAsync();
-        if(StoredTokens != null )
+        UserTokensDto storedTokens = await GetUserTokensAsync();
+        if(storedTokens != null )
         {
-            var Token = new JwtSecurityTokenHandler()
-                .ReadJwtToken(StoredTokens.AccessToken);
+            JwtSecurityToken token = new JwtSecurityTokenHandler()
+                .ReadJwtToken(storedTokens.AccessToken);
 
-            Identity = new ClaimsIdentity(Token.Claims, "Bearer");
+            claimsIdentity = new ClaimsIdentity(token.Claims, "Bearer");
         }
-        return new AuthenticationState(new ClaimsPrincipal(Identity));
+        return new AuthenticationState(new ClaimsPrincipal(claimsIdentity));
     }
 
     public async Task<UserTokensDto> GetUserTokensAsync()
     {
-        UserTokensDto StoredTokens = await TokensRepository.GetTokensAsync();
-        if(StoredTokens != null)
+        UserTokensDto storedTokens = await TokensRepository.GetTokensAsync();
+        if(storedTokens != null)
         {
-            var Token = new JwtSecurityTokenHandler()
-                .ReadJwtToken(StoredTokens.AccessToken);
+            JwtSecurityToken token = new JwtSecurityTokenHandler()
+                .ReadJwtToken(storedTokens.AccessToken);
 
-            if (Token.ValidTo <= DateTime.UtcNow)
+            if (token.ValidTo <= DateTime.UtcNow)
             {
                 try
                 {
-                    var NewTokens = await UserWebApiGateway
-                        .RefreshTokenAsync(StoredTokens);
-                    await LoginAsync(NewTokens);
-                    StoredTokens = NewTokens;
+                    UserTokensDto newTokens = await UserWebApiGateway
+                        .RefreshTokenAsync(storedTokens);
+                    await LoginAsync(newTokens);
+                    storedTokens = newTokens;
                     Console.WriteLine("Access token actualizado");
                 }
                 catch(Exception ex)
                 {
-                    StoredTokens = default;
+                    storedTokens = default;
                     Console.WriteLine(ex.Message);
                     await LogoutAsync();
                 }
             }
         }
-        return StoredTokens;
+        return storedTokens;
     }
 
     public async Task LoginAsync(UserTokensDto userTokensDto)

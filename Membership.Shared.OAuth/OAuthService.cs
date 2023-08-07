@@ -9,44 +9,44 @@ internal class OAuthService : IOAuthService
     public string GetCodeVerifier()
     {
         // https://www.oauth.com/oauth2-servers/pkce/authorization-request/
-        const string PossibleChars =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
-        var SB = new StringBuilder();
-        int MaxIndex = PossibleChars.Length;
-        var RandomGenerator = new Random();
+        const string possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+        
+        StringBuilder stringBuilder = new StringBuilder();
+        int maxIndex = possibleChars.Length;
+        Random randomGenerator = new Random();
         // Code Verifier debe tener una longitud de 43 a 128.
-        int Length = RandomGenerator.Next(43, 129);
-        for (int i = 0; i < Length; i++)
+        int length = randomGenerator.Next(43, 129);
+        for (int i = 0; i < length; i++)
         {
-            SB.Append(PossibleChars[RandomGenerator.Next(MaxIndex)]);
+            stringBuilder.Append(possibleChars[randomGenerator.Next(maxIndex)]);
         }
-        return SB.ToString();
+        return stringBuilder.ToString();
     }
 
     public string GetHash256CodeChallenge(string codeVerifier)
     {
-        var ChallengeBytes =
-            SHA256.HashData(Encoding.UTF8.GetBytes(codeVerifier));
-        return Base64UrlEncoder.Encode(ChallengeBytes);
+        byte[] challengeBytes = SHA256.HashData(Encoding.UTF8.GetBytes(codeVerifier));
+        return Base64UrlEncoder.Encode(challengeBytes);
     }
 
     public string BuildAuthorizeRequestUri(AuthorizeRequestInfo info)
     {
-        var SB = new StringBuilder($"{info.AuthorizeEndpoint}?");
-        SB.Append($"response_type=code&");
-        SB.Append($"client_id={info.ClientId}&");
-        SB.Append($"redirect_uri={info.RedirectUri}&");
-        SB.Append($"state={info.State}&");
-        SB.Append($"scope={info.Scope}&");
-        SB.Append($"code_challenge={info.CodeChallenge}&");
-        SB.Append($"code_challenge_method={info.CodeChallengeMethod}&");
-        SB.Append($"nonce={info.Nonce}");
-        return SB.ToString();
+        StringBuilder stringBuilder = new StringBuilder($"{info.AuthorizeEndpoint}?");
+        stringBuilder.Append($"response_type=code&");
+        stringBuilder.Append($"client_id={info.ClientId}&");
+        stringBuilder.Append($"redirect_uri={info.RedirectUri}&");
+        stringBuilder.Append($"state={info.State}&");
+        stringBuilder.Append($"scope={info.Scope}&");
+        stringBuilder.Append($"code_challenge={info.CodeChallenge}&");
+        stringBuilder.Append($"code_challenge_method={info.CodeChallengeMethod}&");
+        stringBuilder.Append($"nonce={info.Nonce}");
+        
+        return stringBuilder.ToString();
     }
 
     public FormUrlEncodedContent BuildTokenRequestBody(TokenRequestInfo info)
     {
-        Dictionary<string, string> BodyData =
+        Dictionary<string, string> bodyData =
             new()
             {
                 {"grant_type", "authorization_code" },
@@ -59,24 +59,23 @@ internal class OAuthService : IOAuthService
 
         if (!string.IsNullOrWhiteSpace(info.ClientSecret))
         {
-            BodyData.Add("client_secret", info.ClientSecret);
+            bodyData.Add("client_secret", info.ClientSecret);
         }
 
-        return new FormUrlEncodedContent(BodyData);
+        return new FormUrlEncodedContent(bodyData);
     }
 
-    public TokenRequestInfo GetTokenRequestInfoFromRequestBody(
-        Dictionary<string, string> requestBody)
+    public TokenRequestInfo GetTokenRequestInfoFromRequestBody(Dictionary<string, string> requestBody)
     {
-        requestBody.TryGetValue("code", out string Code);
-        requestBody.TryGetValue("redirect_uri", out string RedirectUri);
-        requestBody.TryGetValue("client_id", out string ClientId);
-        requestBody.TryGetValue("scope", out string Scope);
-        requestBody.TryGetValue("code_verifier", out string CodeVerifier);
-        requestBody.TryGetValue("client_secret", out string ClientSecret);
+        requestBody.TryGetValue("code", out string code);
+        requestBody.TryGetValue("redirect_uri", out string redirectUri);
+        requestBody.TryGetValue("client_id", out string clientId);
+        requestBody.TryGetValue("scope", out string scope);
+        requestBody.TryGetValue("code_verifier", out string codeVerifier);
+        requestBody.TryGetValue("client_secret", out string clientSecret);
 
-        return new TokenRequestInfo(Code, RedirectUri, ClientId,
-            Scope, CodeVerifier, ClientSecret);
+        return new TokenRequestInfo(code, redirectUri, clientId,
+            scope, codeVerifier, clientSecret);
 
     }
 
@@ -86,13 +85,13 @@ internal class OAuthService : IOAuthService
         // 3 bytes generan 4 caracteres base64
         // 75 bytes generan 100 caracteres
 
-        double NumBytes = Math.Ceiling(3 * length / 4d);
-        byte[] Buffer = new byte[(int)NumBytes];
-        using var Rng = RandomNumberGenerator.Create();
-        Rng.GetNonZeroBytes(Buffer);
+        double numBytes = Math.Ceiling(3 * length / 4d);
+        byte[] buffer = new byte[(int)numBytes];
+        using RandomNumberGenerator rng = RandomNumberGenerator.Create();
+        rng.GetNonZeroBytes(buffer);
 
         // Requiere paquete Microsoft.IdentityModel.Tokens
-        return Base64UrlEncoder.Encode(Buffer);
+        return Base64UrlEncoder.Encode(buffer);
     }
     #endregion
 

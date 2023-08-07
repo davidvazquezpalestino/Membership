@@ -17,7 +17,7 @@ public partial class ExternalIDPsButtons
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object> Attributes { get; set; }
 
-    ExternalIDPInfo[] IDPs => AuthorizeService.IDPs;
+    ExternalIDPInfo[] IDPs => AuthorizeService.IDPInfos;
 
     string ContentPath =>
         $"_content/{this.GetType().Assembly.GetName().Name}";
@@ -27,8 +27,8 @@ public partial class ExternalIDPsButtons
         $"{ContentPath}/images/idps/{idpInfo.ProviderId}.png" :
         idpInfo.ImagePath;
 
-    async void BuildUrl(string idp)
+    async void BuildUrl(string providerId)
     {
-        await AuthorizeService.AuthorizeAsync(idp, ScopeAction, ReturnUri);
+        await AuthorizeService.AuthorizeAsync(providerId, ScopeAction, ReturnUri);
     }
 }

@@ -1,19 +1,11 @@
-﻿using Membership.Abstractions.Interfaces.Authorize;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Membership.Core.Controllers;
+﻿namespace Membership.Core.Controllers;
 internal class AuthorizeController
 {
     public static void Map(WebApplication app)
     {
-        app.MapGet(MembershipEndpoints.Authorize,
-            async(HttpRequest request, IAuthorizeInputPort inputPort) =>
+        app.MapGet(MembershipEndpoints.Authorize, async (HttpRequest request, IAuthorizeInputPort inputPort) =>
             {
-                var RequestInfo = new AppClientAuthorizeRequestInfo()
+                AppClientAuthorizeRequestInfo requestInfo = new AppClientAuthorizeRequestInfo()
                 {
                     ClientId = request.Query["client_id"],
                     RedirectUri = request.Query["redirect_uri"],
@@ -23,10 +15,9 @@ internal class AuthorizeController
                     CodeChallengeMethod = request.Query["code_challenge_method"],
                     Nonce = request.Query["nonce"]
                 };
-                string RedirectUri =
-                await inputPort.GetAuthorizeRequestRedirectUri(RequestInfo);
-                return Results.Redirect(RedirectUri);
-            }
-            );
+                string redirectUri =
+                await inputPort.GetAuthorizeRequestRedirectUri(requestInfo);
+                return Results.Redirect(redirectUri);
+            });
     }
 }

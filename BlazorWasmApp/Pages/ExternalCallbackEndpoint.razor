@@ -1,4 +1,5 @@
 ﻿@page "/oauth2/callback"
+@using Membership.Shared.ValueObjects
 @inherits ExternalCallbackEndpointBase
 
 @if(!string.IsNullOrWhiteSpace(Message))
@@ -10,7 +11,7 @@
         @if(Errors != null)
         {
             <ul>
-                @foreach(var Error in Errors)
+                @foreach(MembershipError Error in Errors)
                 {
                     <li>
                         @Error.Description

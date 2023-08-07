@@ -22,9 +22,9 @@ public partial class LoginComponent
         try
         {
             ErrorMessage = null;
-            var Tokens = await Gateway.LoginAsync(UserCredentials);
-            await AuthenticationStateProvider.LoginAsync(Tokens);
-            await OnLogin.InvokeAsync(Tokens);
+            UserTokensDto tokens = await Gateway.LoginAsync(UserCredentials);
+            await AuthenticationStateProvider.LoginAsync(tokens);
+            await OnLogin.InvokeAsync(tokens);
         }
         catch (HttpRequestException ex)
         {

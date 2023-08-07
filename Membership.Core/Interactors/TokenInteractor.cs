@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Membership.Core.Interactors;
+﻿namespace Membership.Core.Interactors;
 internal class TokenInteractor : ITokenInputPort
 {
     readonly IOAuthStateService OAuthStateService;
@@ -24,68 +18,81 @@ internal class TokenInteractor : ITokenInputPort
 
     public async Task HandleTokenRequestAsync(TokenRequestInfo info)
     {
-        UserEntity UserEntity = null;
-        StateInfo StateInfo = await OAuthStateService.GetAsync<StateInfo>(info.Code);
-        if (StateInfo == null)
+        UserEntity userEntity = null;
+        StateInfo stateInfo = await OAuthStateService.GetAsync<StateInfo>(info.Code);
+        if (stateInfo == null)
+        {
             throw new InvalidAuthorizationCodeException();
-        if(StateInfo.AppClientStateInfo.RedirectUri != info.RedirectUri)
+        }
+
+        if(stateInfo.AppClientStateInfo.RedirectUri != info.RedirectUri)
+        {
             throw new InvalidRedirectUriException();
-        if(StateInfo.AppClientStateInfo.ClientId != info.ClientId)
+        }
+
+        if(stateInfo.AppClientStateInfo.ClientId != info.ClientId)
+        {
             throw new InvalidClientIdException();
-        if(StateInfo.AppClientStateInfo.Scope != info.Scope)
+        }
+
+        if(stateInfo.AppClientStateInfo.Scope != info.Scope)
+        {
             throw new InvalidScopeException();
-        if(StateInfo.AppClientStateInfo.CodeChallenge !=
-            OAuthService.GetHash256CodeChallenge(info.CodeVerifier))
+        }
+
+        if(stateInfo.AppClientStateInfo.CodeChallenge !=
+           OAuthService.GetHash256CodeChallenge(info.CodeVerifier))
+        {
             throw new InvalidCodeVerifierException();
+        }
 
-        string Action = info.Scope[..info.Scope.IndexOf("_")]?.ToLower();
+        string action = info.Scope[..info.Scope.IndexOf("_", StringComparison.Ordinal)]?.ToLower();
 
-        var IdentityToken = new JwtSecurityTokenHandler()
-            .ReadJwtToken(StateInfo.Tokens.IdToken);
+        JwtSecurityToken identityToken = new JwtSecurityTokenHandler()
+            .ReadJwtToken(stateInfo.Tokens.IdToken);
 
-        string FirstName = IdentityToken.Claims.FirstOrDefault(
-            c => c.Type == "given_name")?.Value;
-        string LastName = IdentityToken.Claims.FirstOrDefault(
-            c => c.Type == "family_name")?.Value;
-        string Name = IdentityToken.Claims.FirstOrDefault(
-            c => c.Type == "name")?.Value;
-        string Sub = IdentityToken.Claims.FirstOrDefault(
-            c => c.Type == "sub")?.Value;
+        string firstName = identityToken.Claims.FirstOrDefault(claim => claim.Type == "given_name")?.Value;
+        string lastName = identityToken.Claims.FirstOrDefault(claim => claim.Type == "family_name")?.Value;
+        string name = identityToken.Claims.FirstOrDefault(claim => claim.Type == "name")?.Value;
+        string sub = identityToken.Claims.FirstOrDefault(claim => claim.Type == "sub")?.Value;
+        string email = identityToken.Claims.FirstOrDefault(claim => claim.Type == "email")?.Value;
 
-        string Email = IdentityToken.Claims.FirstOrDefault(
-            c => c.Type == "email")?.Value;
+        if (string.IsNullOrEmpty(email))
+        {
+            email = sub;
+        }
 
-        if (string.IsNullOrEmpty(Email)) Email = Sub;
-        if (string.IsNullOrEmpty(FirstName) && string.IsNullOrEmpty(LastName))
-            FirstName = Name ?? Email;
+        if (string.IsNullOrEmpty(firstName) && string.IsNullOrEmpty(lastName))
+        {
+            firstName = name ?? email;
+        }
 
-        var ExternalUserEntity = new ExternalUserEntity(Email, FirstName,
-            LastName, StateInfo.ProviderId, Sub);
+        ExternalUserEntity externalUserEntity = new ExternalUserEntity(email, firstName,
+            lastName, stateInfo.ProviderId, sub);
 
-        switch(Action)
+        switch(action)
         {
             case "register":
                 await UserManagerService.ThrowIfUnableToRegisterExternalUserAsync
-                    (ExternalUserEntity);
-                UserEntity = await UserManagerService
+                    (externalUserEntity);
+                userEntity = await UserManagerService
                     .ThrowIfUnableToGetUserByExternalCredentialsAsync(
                     new ExternalUserCredentials(
-                        ExternalUserEntity.LoginProvider,
-                        ExternalUserEntity.ProviderUserId));
+                        externalUserEntity.LoginProvider,
+                        externalUserEntity.ProviderUserId));
                 break;
             case "login":
-                UserEntity = await UserManagerService
+                userEntity = await UserManagerService
                     .ThrowIfUnableToGetUserByExternalCredentialsAsync(
                     new ExternalUserCredentials(
-                        ExternalUserEntity.LoginProvider,
-                        ExternalUserEntity.ProviderUserId));
+                        externalUserEntity.LoginProvider,
+                        externalUserEntity.ProviderUserId));
                 break;
             default:
                 throw new InvalidScopeActionException();
         }
-        UserEntity.Claims = new List<Claim> { new Claim("nonce", 
-            StateInfo.AppClientStateInfo.Nonce) };
-        await Presenter.HandleUserEntityAsync(UserEntity);
+        userEntity.Claims = new List<Claim> { new Claim("nonce", stateInfo.AppClientStateInfo.Nonce) };
+        await Presenter.HandleUserEntityAsync(userEntity);
     }
 }
 

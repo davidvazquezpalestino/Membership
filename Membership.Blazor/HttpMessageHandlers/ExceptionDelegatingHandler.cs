@@ -1,53 +1,57 @@
-﻿using Membership.Shared.ValueObjects;
-
-namespace Membership.Blazor.HttpMessageHandlers;
+﻿namespace Membership.Blazor.HttpMessageHandlers;
 internal class ExceptionDelegatingHandler : DelegatingHandler
 {
-    protected override async Task<HttpResponseMessage> SendAsync(
-        HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        var Response = await base.SendAsync(request, cancellationToken);
-        if (!Response.IsSuccessStatusCode)
+        HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
+        if (!response.IsSuccessStatusCode)
         {
-            string ErrorMessage = await Response.Content.ReadAsStringAsync();
-            string Source = null;
-            string Message = null;
-            IEnumerable<MembershipError> Errors = null;
-            bool IsValidProblemDetails = false;
+            string errorMessage = await response.Content.ReadAsStringAsync(cancellationToken);
+            string source = null;
+            string message = null;
+            IEnumerable<MembershipError> errors = null;
+            bool isValidProblemDetails = false;
 
             try
             {
-                var JsonResponse = JsonSerializer.Deserialize<JsonElement>(ErrorMessage);
-                if (JsonResponse.TryGetProperty("instance", out JsonElement InstanceValue))
+                JsonElement jsonResponse = JsonSerializer.Deserialize<JsonElement>(errorMessage);
+                if (jsonResponse.TryGetProperty("instance", out JsonElement instanceValue))
                 {
-                    string Value = InstanceValue.ToString();
-                    if (Value.ToLower().StartsWith("problemdetails"))
+                    string value = instanceValue.ToString();
+                    if (value.ToLower().StartsWith("problemdetails"))
                     {
-                        Source = Value;
-                        if (JsonResponse.TryGetProperty("title", out var TitleValue))
-                            Message = TitleValue.ToString();
-                        if (JsonResponse.TryGetProperty("errors",
-                            out JsonElement ErrorsValue))
+                        source = value;
+                        if (jsonResponse.TryGetProperty("title", out JsonElement titleValue))
                         {
-                            Errors = JsonSerializer
-                                .Deserialize<IEnumerable<MembershipError>>(ErrorsValue);
+                            message = titleValue.ToString();
                         }
-                        IsValidProblemDetails = true;
+
+                        if (jsonResponse.TryGetProperty("errors", out JsonElement errorsValue))
+                        {
+                            errors = errorsValue.Deserialize<IEnumerable<MembershipError>>();
+                        }
+
+                        isValidProblemDetails = true;
                     }
                 }
             }
             catch { }
-            if (!IsValidProblemDetails)
+
+            if (!isValidProblemDetails)
             {
-                Message = ErrorMessage;
-                Source = null;
-                Errors = null;
+                message = errorMessage;
+                source = null;
+                errors = null;
             }
-            var Ex = new HttpRequestException(Message, null, Response.StatusCode);
-            Ex.Source = Source;
-            if (Errors != null) Ex.Data.Add("Errors", Errors);
-            throw Ex;
+            HttpRequestException ex = new HttpRequestException(message, null, response.StatusCode);
+            ex.Source = source;
+            if (errors != null)
+            {
+                ex.Data.Add("Errors", errors);
+            }
+
+            throw ex;
         }
-        return Response;
+        return response;
     }
 }

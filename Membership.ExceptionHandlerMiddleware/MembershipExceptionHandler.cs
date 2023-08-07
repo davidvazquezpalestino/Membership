@@ -1,45 +1,39 @@
 ﻿namespace Membership.ExceptionHandlerMiddleware;
 public static class MembershipExceptionHandler
 {
-    static Dictionary<Type, Delegate> ExceptionHandlers = new();
+    static readonly Dictionary<Type, Delegate> ExceptionHandlers = new();
     public static void AddHandler(Type exceptionType, Delegate @delegate) =>
         ExceptionHandlers.TryAdd(exceptionType, @delegate);
 
     public static void AddHttp400Handler<T>()
     {
-        string ExceptionTypeName = typeof(T).Name;
-        ExceptionHandlers.TryAdd(typeof(T),
-            (T ex, IMembershipMessageLocalizer localizer) =>
-            new ProblemDetails().FromHttp400BadRequest(
-                localizer[$"{ExceptionTypeName}Message"],
-                ExceptionTypeName));
+        string exceptionTypeName = typeof(T).Name;
+        ExceptionHandlers.TryAdd(typeof(T), (T ex, IMembershipMessageLocalizer localizer) =>
+            new ProblemDetails().FromHttp400BadRequest(localizer[$"{exceptionTypeName}Message"], exceptionTypeName));
     }
 
-    public static async Task<bool> WriteResponse(
-        HttpContext context, IMembershipMessageLocalizer localizer)
+    public static async Task<bool> WriteResponse(HttpContext context, IMembershipMessageLocalizer localizer)
     {
-        IExceptionHandlerFeature ExceptionDetail =
+        IExceptionHandlerFeature exceptionDetail =
             context.Features.Get<IExceptionHandlerFeature>();
+                Exception exceptionError = exceptionDetail?.Error;
 
-        Exception ExceptionError = ExceptionDetail?.Error;
+        bool handled = true;
 
-        bool Handled = true;
-
-        if (ExceptionError != null)
+        if (exceptionError != null)
         {
-            if (ExceptionHandlers.TryGetValue(ExceptionError.GetType(),
-                out Delegate Handler))
+            if (ExceptionHandlers.TryGetValue(exceptionError.GetType(), out Delegate handler))
             {
                 await WriteProblemDetailsAsync(context,
-                    Handler.DynamicInvoke(ExceptionError, localizer)
+                    handler.DynamicInvoke(exceptionError, localizer)
                     as ProblemDetails);
             }
             else
             {
-                Handled = false;
+                handled = false;
             }
         }
-        return Handled;
+        return handled;
     }
 
 
@@ -52,17 +46,19 @@ public static class MembershipExceptionHandler
         problem.Title = title;
         problem.Instance = $"problemDetails/{instance}";
         if (extensions != null)
+        {
             problem.Extensions.Add("errors", extensions);
+        }
+
         return problem;
     }
 
-    static async Task WriteProblemDetailsAsync(HttpContext context,
-        ProblemDetails details)
+    static async Task WriteProblemDetailsAsync(HttpContext context, ProblemDetails details)
     {
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = details.Status.Value;
-        var Stream = context.Response.Body;
-        await JsonSerializer.SerializeAsync(Stream, details);
+        Stream stream = context.Response.Body;
+        await JsonSerializer.SerializeAsync(stream, details);
     }
 
 }

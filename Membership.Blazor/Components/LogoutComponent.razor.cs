@@ -13,11 +13,11 @@ public partial class LogoutComponent
 
     async void Logout()
     {
-        var StoredTokens =
+        UserTokensDto storedTokens =
             await AuthenticationStateProvider.GetUserTokensAsync();
-        if (StoredTokens != null)
+        if (storedTokens != null)
         {
-            await Gateway.LogoutAsync(StoredTokens);
+            await Gateway.LogoutAsync(storedTokens);
         }
         await AuthenticationStateProvider.LogoutAsync();
         NavigationManager.NavigateTo("");

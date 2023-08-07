@@ -1,12 +1,4 @@
-﻿using Membership.Shared.Interfaces;
-using Membership.Shared.ValueObjects;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Membership.Blazor.Services;
+﻿namespace Membership.Blazor.Services;
 internal class AuthorizeService: IAuthorizeService
 {
     readonly IOptions<AppOptions> AppOptions;
@@ -24,29 +16,27 @@ internal class AuthorizeService: IAuthorizeService
         NavigationManager = navigationManager;
     }
 
-    public ExternalIDPInfo[] IDPs => AppOptions.Value.IDPs;
+    public ExternalIDPInfo[] IDPInfos => AppOptions.Value.IDPInfos;
 
     public async Task AuthorizeAsync(string providerId, ScopeAction action,
         string returnUri)
     {
-        var StateInfo = new StateInfo(
-            OAuthService.GetState(), OAuthService.GetCodeVerifier(),
+        StateInfo stateInfo = new StateInfo(OAuthService.GetState(), OAuthService.GetCodeVerifier(),
             OAuthService.GetNonce(), $"{action}_{providerId}", returnUri);
 
-        var RequestData = new AuthorizeRequestInfo(
+        AuthorizeRequestInfo requestData = new AuthorizeRequestInfo(
             AppOptions.Value.AuthorizationEndpoint,
             AppOptions.Value.ClientId,
             AppOptions.Value.RedirectUri,
-            StateInfo.State,
-            StateInfo.Scope,
-            OAuthService.GetHash256CodeChallenge(StateInfo.CodeVerifier),
+            stateInfo.State,
+            stateInfo.Scope,
+            OAuthService.GetHash256CodeChallenge(stateInfo.CodeVerifier),
             OAuthService.CodeChallengeMethodSha256,
-            StateInfo.Nonce);
+            stateInfo.Nonce);
 
-        await StateService.SetAsync(StateInfo.State, StateInfo);
+        await StateService.SetAsync(stateInfo.State, stateInfo);
 
         NavigationManager.NavigateTo(
-            OAuthService.BuildAuthorizeRequestUri(RequestData));
+            OAuthService.BuildAuthorizeRequestUri(requestData));
     }
-
 }

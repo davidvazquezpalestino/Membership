@@ -1,15 +1,9 @@
-﻿using Membership.Shared.ValueObjects;
-
-namespace Membership.Shared.Validators;
+﻿namespace Membership.Shared.Validators;
 internal class UserCredentialsDtoValidator : AbstractValidator<UserCredentialsDto>
 {
-    public UserCredentialsDtoValidator(IMembershipMessageLocalizer localizer) :
-        base(localizer)
-    {
-    }
+    public UserCredentialsDtoValidator(IMembershipMessageLocalizer localizer) : base(localizer) { }
 
-    protected override void ValidatePropertyRules(UserCredentialsDto entity,
-        string propertyName, List<MembershipError> errors)
+    protected override void ValidatePropertyRules(UserCredentialsDto entity, string propertyName, List<MembershipError> errors)
     {
         switch(propertyName)
         {

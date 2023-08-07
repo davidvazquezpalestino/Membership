@@ -5,26 +5,32 @@ internal class AuthorizeCallbackInteractor : IAuthorizeCallbackInputPort
     readonly IIDPService IDPService;
 
     public AuthorizeCallbackInteractor(IOAuthStateService oAuthStateService,
-        IIDPService iDPService)
+        IIDPService idpService)
     {
         OAuthStateService = oAuthStateService;
-        IDPService = iDPService;
+        IDPService = idpService;
     }
 
     public async Task<string> HandleCallback(string state, string code)
     {
-        var StateInfo = await OAuthStateService.GetAsync<StateInfo>(state);
-        if (StateInfo == null) throw new MissingCallbackStateParameterException();
+        StateInfo stateInfo = await OAuthStateService.GetAsync<StateInfo>(state);
+        if (stateInfo == null)
+        {
+            throw new MissingCallbackStateParameterException();
+        }
 
-        var Tokens = await IDPService.GetTokensAsync(
-            StateInfo.ProviderId, code, StateInfo.CodeVerifier, StateInfo.Nonce);
+        IDPTokens tokens = await IDPService.GetTokensAsync(
+            stateInfo.ProviderId, code, stateInfo.CodeVerifier, stateInfo.Nonce);
 
-        if (Tokens == null) throw new UnableToGetIDPTokensException();
-        StateInfo.Tokens = Tokens;
+        if (tokens == null)
+        {
+            throw new UnableToGetIDPTokensException();
+        }
 
-        string RedirectUri = string.Format("{0}?state={1}&code={2}",
-            StateInfo.AppClientStateInfo.RedirectUri,
-            StateInfo.AppClientStateInfo.State, state);
-        return RedirectUri;
+        stateInfo.Tokens = tokens;
+
+        string redirectUri =
+            $"{stateInfo.AppClientStateInfo.RedirectUri}?state={stateInfo.AppClientStateInfo.State}&code={state}";
+        return redirectUri;
     }
 }

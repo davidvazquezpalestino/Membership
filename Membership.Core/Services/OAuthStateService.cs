@@ -10,8 +10,8 @@ internal class OAuthStateService : IOAuthStateService
 
     public Task<T> GetAsync<T>(string key)
     {
-        Cache.TryGetValue(key, out T Value);
-        return Task.FromResult<T>(Value);
+        Cache.TryGetValue(key, out T value);
+        return Task.FromResult<T>(value);
     }
 
     public Task RemoveAsync(string key)

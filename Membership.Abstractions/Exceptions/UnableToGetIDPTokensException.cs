@@ -1,16 +1,8 @@
 ﻿namespace Membership.Abstractions.Exceptions;
 public class UnableToGetIDPTokensException : Exception
 {
-    public UnableToGetIDPTokensException()
-    {
-    }
-
-    public UnableToGetIDPTokensException(string message) : base(message)
-    {
-    }
-
-    public UnableToGetIDPTokensException(string message, Exception innerException) : base(message, innerException)
-    {
-    }
+    public UnableToGetIDPTokensException() { }
+    public UnableToGetIDPTokensException(string message) : base(message) { }
+    public UnableToGetIDPTokensException(string message, Exception innerException) : base(message, innerException) { }
 
 }

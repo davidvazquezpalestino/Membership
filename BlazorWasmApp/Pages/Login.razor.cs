@@ -10,16 +10,10 @@ public partial class Login
     [Inject]
     NavigationManager NavigationManager { get; set; }
 
-    void OnLogin(UserTokensDto tokens)
-    {
-        NavigationManager.NavigateTo(GetReturnUri());
-    }
-
-
+    void OnLogin(UserTokensDto tokens) => NavigationManager.NavigateTo(GetReturnUri());
     string GetReturnUri()
     {
-        string NavigateTo = NavigationManager.Uri.EndsWith(RouteTemplate) ? ""
-            : NavigationManager.Uri;
-        return NavigateTo;
+        string navigateTo = NavigationManager.Uri.EndsWith(RouteTemplate) ? "" : NavigationManager.Uri;
+        return navigateTo;
     }
 }

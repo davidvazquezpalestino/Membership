@@ -14,30 +14,34 @@ internal class AccessTokenService : IAccessTokenService
 
     string GetAccessToken(List<Claim> userClaims)
     {
-        var Key = Encoding.UTF8.GetBytes(JwtOptions.SecurityKey);
-        var Secret = new SymmetricSecurityKey(Key);
-        var SigningCredentials = new SigningCredentials(Secret,
+        byte[] key = Encoding.UTF8.GetBytes(JwtOptions.SecurityKey);
+        SymmetricSecurityKey secret = new SymmetricSecurityKey(key);
+        SigningCredentials signingCredentials = new SigningCredentials(secret,
             SecurityAlgorithms.HmacSha256);
 
-        var TokenOptions = new JwtSecurityToken(
+        JwtSecurityToken tokenOptions = new JwtSecurityToken(
             issuer: JwtOptions.ValidIssuer,
             audience: JwtOptions.ValidAudience,
             claims: userClaims,
             expires: DateTime.Now.AddMinutes(JwtOptions.ExpireInMinutes),
-            signingCredentials: SigningCredentials);
-        return new JwtSecurityTokenHandler().WriteToken(TokenOptions);
+            signingCredentials: signingCredentials);
+        return new JwtSecurityTokenHandler().WriteToken(tokenOptions);
     }
 
     static List<Claim> GetUserClaims(UserEntity user)
     {
-        var DefaultUserClaims = 
-            new List<Claim>()
+        List<Claim> defaultUserClaims = 
+            new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Email),
                 new Claim("FullName", $"{user.FullName}")
             };
-        if (user.Claims != null) DefaultUserClaims.AddRange(user.Claims);
-        return DefaultUserClaims;
+        if (user.Claims != null)
+        {
+            defaultUserClaims.AddRange(user.Claims);
+        }
+
+        return defaultUserClaims;
     }
     static List<Claim> GetUserClaimsFromAccessToken(string accesToken) =>
         new JwtSecurityTokenHandler()

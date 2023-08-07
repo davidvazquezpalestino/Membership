@@ -1,19 +1,17 @@
-﻿using Membership.Shared.ValueObjects;
-
-namespace Membership.UserManagerService.AspNetIdentity.Services;
+﻿namespace Membership.UserManagerService.AspNetIdentity.Services;
 internal partial class UserManagerService
 {
     public async Task<IEnumerable<MembershipError>> RegisterExternalUserAsync(
         ExternalUserEntity user)
     {
-        IEnumerable<MembershipError> Errors = null;
-        IdentityResult Result = null;
-        bool UserExists = false;
+        IEnumerable<MembershipError> errors = null;
+        IdentityResult result = null;
+        bool userExists = false;
 
-        var ExistingUser = await UserManager.FindByEmailAsync(user.Email);
-        if (ExistingUser == null)
+        User existingUser = await UserManager.FindByEmailAsync(user.Email);
+        if (existingUser == null)
         {
-            ExistingUser = new User
+            existingUser = new User
             {
                 UserName = user.Email,
                 Email = user.Email,
@@ -21,41 +19,41 @@ internal partial class UserManagerService
                 LastName = user.LastName
             };
 
-            Result = await UserManager.CreateAsync(ExistingUser);
-            UserExists = Result.Succeeded;
+            result = await UserManager.CreateAsync(existingUser);
+            userExists = result.Succeeded;
         }
         else
         {
-            UserExists = true;
+            userExists = true;
         }
 
-        if (UserExists)
+        if (userExists)
         {
-            Result = await UserManager.AddLoginAsync(ExistingUser,
+            result = await UserManager.AddLoginAsync(existingUser,
                 new UserLoginInfo(user.LoginProvider, user.ProviderUserId,
                 user.LoginProvider));
         }
 
-        if (Result != null && !Result.Succeeded)
+        if (result != null && !result.Succeeded)
         {
-            Errors = ErrorsHandler.Handle(Result.Errors);
+            errors = ErrorsHandler.Handle(result.Errors);
         }
 
-        return Errors;
+        return errors;
     }
 
     public async Task<UserEntity> GetUserByExternalCredentialsAsync(
         ExternalUserCredentials userCredentials)
     {
-        UserEntity FoundUser = default;
-        var User = await UserManager.FindByLoginAsync(
+        UserEntity foundUser = default;
+        User user = await UserManager.FindByLoginAsync(
             userCredentials.LoginProvider, userCredentials.ProviderUserId);
-        if (User != null)
+        if (user != null)
         {
-            FoundUser = new UserEntity(User.UserName,
-                User.FirstName, User.LastName);
+            foundUser = new UserEntity(user.UserName,
+                user.FirstName, user.LastName);
         }
-        return FoundUser;
+        return foundUser;
     }
 }
 

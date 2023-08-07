@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Membership.Blazor.Components;
+﻿namespace Membership.Blazor.Components;
 public class ExternalCallbackEndpointBase : ComponentBase
 {
     [Inject]
@@ -32,38 +25,32 @@ public class ExternalCallbackEndpointBase : ComponentBase
     {
         try
         {
-            var Response = await TokenService.GetTokensAsync(State, Code);
-            string Action = Response.Scope[..Response.Scope.IndexOf("_")];
-            if (Enum.TryParse<ScopeAction>(Action, out ScopeAction ScopeAction))
+            TokenServiceResponse response = await TokenService.GetTokensAsync(State, Code);
+            string action = response.Scope[..response.Scope.IndexOf("_")];
+            
+            if (Enum.TryParse<ScopeAction>(action, out ScopeAction scopeAction))
             {
-                switch (ScopeAction)
+                switch (scopeAction)
                 {
                     case ScopeAction.Register:
                     case ScopeAction.Login:
-                        await AuthenticationStateProvider.LoginAsync(
-                            Response.Tokens);
+                        await AuthenticationStateProvider.LoginAsync(response.Tokens);
                         break;
                 }
             }
-            if (string.IsNullOrWhiteSpace(Response.ReturnUri))
-            {
-                NavigationManager.NavigateTo("");
-            }
-            else
-            {
-                NavigationManager.NavigateTo(Response.ReturnUri);
-            }
+
+            NavigationManager.NavigateTo(string.IsNullOrWhiteSpace(response.ReturnUri) ? "" : response.ReturnUri);
         }
         catch (HttpRequestException ex)
         {
-            IEnumerable<MembershipError> Errors = null;
+            IEnumerable<MembershipError> errors = null;
             if (ex.Data.Contains("Errors"))
             {
-                Errors = ex.Data["Errors"] as IEnumerable<MembershipError>;
+                errors = ex.Data["Errors"] as IEnumerable<MembershipError>;
             }
             OnError(string.IsNullOrWhiteSpace(ex.Message) ?
                 Localizer[MessageKeys.UnableToGetExternalUserTokens] : ex.Message
-                , Errors);
+                , errors);
         }
         catch (Exception ex)
         {
@@ -73,7 +60,5 @@ public class ExternalCallbackEndpointBase : ComponentBase
         }
     }
 
-    protected virtual void OnError(string message,
-        IEnumerable<MembershipError> errors)
-    { }
+    protected virtual void OnError(string message, IEnumerable<MembershipError> errors){ }
 }

@@ -7,12 +7,12 @@ internal class TokenController
             async (HttpContext context, ITokenInputPort inputPort,
             IOAuthService oAuthService, ILoginOutputPort presenter) =>
             {
-                var RequestBody = context.Request.Form.ToDictionary(i => i.Key,
+                Dictionary<string, string> requestBody = context.Request.Form.ToDictionary(i => i.Key,
                     i => i.Value.ToString());
-                var RequestInfo = oAuthService
-                .GetTokenRequestInfoFromRequestBody(RequestBody);
+                TokenRequestInfo requestInfo = oAuthService
+                .GetTokenRequestInfoFromRequestBody(requestBody);
 
-                await inputPort.HandleTokenRequestAsync(RequestInfo);
+                await inputPort.HandleTokenRequestAsync(requestInfo);
                 context.Response.Headers.Add("Cache-Control", "no-store");
                 return Results.Ok(presenter.UserTokens);
             });
