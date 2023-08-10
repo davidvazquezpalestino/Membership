@@ -6,24 +6,24 @@ internal class UserManagerErrorsHandler
 
     public IEnumerable<MembershipError> Handle(IEnumerable<IdentityError> errors)
     {
-        List<MembershipError> Errors = new();
-        foreach (IdentityError IdentityError in errors)
+        List<MembershipError> membershipErrors = new ();
+        foreach (IdentityError identityError in errors)
         {
-            switch (IdentityError.Code)
+            switch (identityError.Code)
             {
                 case nameof(IdentityErrorDescriber.DuplicateUserName):
-                    Errors.Add(new(nameof(User.Email),
+                    membershipErrors.Add(new MembershipError(nameof(User.Email),
                         Localizer[MessageKeys.DuplicateEmailErrorMessage]));
                     break;
                 case nameof(IdentityErrorDescriber.LoginAlreadyAssociated):
-                    Errors.Add(new(nameof(User.Email),
+                    membershipErrors.Add(new MembershipError(nameof(User.Email),
                         Localizer[MessageKeys.LoginAlreadyAssociatedErrorMessage]));
                     break;
                 default:
-                    Errors.Add(new(IdentityError.Code, IdentityError.Description));
+                    membershipErrors.Add(new MembershipError(identityError.Code, identityError.Description));
                     break;
             }
         }
-        return Errors;
+        return membershipErrors;
     }
 }

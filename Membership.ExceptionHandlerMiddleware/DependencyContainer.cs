@@ -9,9 +9,8 @@ public static class DependencyContainer
         app.UseExceptionHandler(builder =>
         {
             builder.Run(async (context) =>
-            await MembershipExceptionHandler.WriteResponse(
-                context, app.ApplicationServices
-                .GetRequiredService<IMembershipMessageLocalizer>()));
+            await MembershipExceptionHandler.WriteResponse(context, 
+                app.ApplicationServices.GetRequiredService<IMembershipMessageLocalizer>()));
         });
 
         return app;
@@ -22,8 +21,7 @@ public static class DependencyContainer
         MembershipExceptionHandler.AddHandler(typeof(RegisterUserException),
             (RegisterUserException ex,
             IMembershipMessageLocalizer localizer) =>
-            new ProblemDetails().FromHttp400BadRequest(
-                localizer[MessageKeys.RegisterUserExceptionMessage],
+            new ProblemDetails().FromHttp400BadRequest(localizer[MessageKeys.RegisterUserExceptionMessage],
                 nameof(RegisterUserException),
                 ex.Errors));
 

@@ -39,8 +39,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services
         .AddMembershipCoreServices(jwtOptions => builder.Configuration.GetSection(JwtOptions.SectionKey)
         .Bind(jwtOptions),
-    appClientInfoOptions => appClientInfoOptions.AppClients =
-    builder.Configuration.GetSection(AppClientInfoOptions.SectionKey).Get<AppClientInfo[]>(),
+    appClientInfoOptions => 
+        appClientInfoOptions.AppClients = builder.Configuration.GetSection(AppClientInfoOptions.SectionKey).Get<AppClientInfo[]>(),
         clientInfoOptions => clientInfoOptions.IDPClients = builder.Configuration.GetSection(IDPClientInfoOptions.SectionKey)
     .Get<IDPClientInfo[]>())
     .AddMembershipValidators()
