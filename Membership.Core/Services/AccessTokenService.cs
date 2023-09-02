@@ -31,7 +31,7 @@ internal class AccessTokenService : IAccessTokenService
     static List<Claim> GetUserClaims(UserEntity user)
     {
         List<Claim> defaultUserClaims = 
-            new List<Claim>
+            new List<Claim>()
             {
                 new Claim(ClaimTypes.Name, user.Email),
                 new Claim("FullName", $"{user.FullName}")

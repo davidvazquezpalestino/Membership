@@ -2,13 +2,13 @@
 internal class AuthorizeCallbackInteractor : IAuthorizeCallbackInputPort
 {
     readonly IOAuthStateService OAuthStateService;
-    readonly IIDPService IDPService;
+    readonly IIDPService IdpService;
 
     public AuthorizeCallbackInteractor(IOAuthStateService oAuthStateService,
-        IIDPService idpService)
+        IIDPService iDpService)
     {
         OAuthStateService = oAuthStateService;
-        IDPService = idpService;
+        IdpService = iDpService;
     }
 
     public async Task<string> HandleCallback(string state, string code)
@@ -19,7 +19,7 @@ internal class AuthorizeCallbackInteractor : IAuthorizeCallbackInputPort
             throw new MissingCallbackStateParameterException();
         }
 
-        IDPTokens tokens = await IDPService.GetTokensAsync(
+        IDPTokens tokens = await IdpService.GetTokensAsync(
             stateInfo.ProviderId, code, stateInfo.CodeVerifier, stateInfo.Nonce);
 
         if (tokens == null)
@@ -29,8 +29,9 @@ internal class AuthorizeCallbackInteractor : IAuthorizeCallbackInputPort
 
         stateInfo.Tokens = tokens;
 
-        string redirectUri =
-            $"{stateInfo.AppClientStateInfo.RedirectUri}?state={stateInfo.AppClientStateInfo.State}&code={state}";
+        string redirectUri = string.Format("{0}?state={1}&code={2}",
+            stateInfo.AppClientStateInfo.RedirectUri,
+            stateInfo.AppClientStateInfo.State, state);
         return redirectUri;
     }
 }

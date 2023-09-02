@@ -13,16 +13,16 @@ internal class LoginInteractor : ILoginInputPort
         OutputPort = outputPort;
     }
 
-    public async Task LogingAsync(UserCredentialsDto userCredentialsDto)
+    public async Task LogingAsync(UserCredentialsDto userCredentials)
     {
-        IEnumerable<MembershipError> validationErrors = Validator.Validate(userCredentialsDto);
+        IEnumerable<MembershipError> validationErrors = Validator.Validate(userCredentials);
         if (validationErrors != null && validationErrors.Any())
         {
             throw new LoginUserException();
         }
 
         UserEntity user = await UserManagerService.
-            ThrowIfUnableToGetUserByCredentialsAsync(userCredentialsDto);
+            ThrowIfUnableToGetUserByCredentialsAsync(userCredentials);
 
         await OutputPort.HandleUserEntityAsync(user);
     }

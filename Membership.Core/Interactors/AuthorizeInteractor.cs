@@ -3,16 +3,16 @@ internal class AuthorizeInteractor : IAuthorizeInputPort
 {
     readonly IAppClientService AppClientService;
     readonly IOAuthService OAuthService;
-    readonly IIDPService IDPService;
+    readonly IIDPService IdpService;
     readonly IOAuthStateService OAuthStateService;
 
     public AuthorizeInteractor(IAppClientService appClientService,
-        IOAuthService oauthService, IIDPService idpService,
+        IOAuthService oauthService, IIDPService iDpService,
         IOAuthStateService oAuthStateService)
     {
         AppClientService = appClientService;
         OAuthService = oauthService;
-        IDPService = idpService;
+        IdpService = iDpService;
         OAuthStateService = oAuthStateService;
     }
 
@@ -27,11 +27,12 @@ internal class AuthorizeInteractor : IAuthorizeInputPort
         {
             CodeVerifier = OAuthService.GetCodeVerifier(),
             Nonce = OAuthService.GetNonce(),
-            ProviderId = requestInfo.Scope.Substring(requestInfo.Scope.IndexOf("_", StringComparison.Ordinal) + 1),
+            ProviderId = requestInfo.Scope.Substring(
+                requestInfo.Scope.IndexOf("_", StringComparison.Ordinal) + 1),
             AppClientStateInfo = requestInfo
         };
 
-        string requestUri = await IDPService.GetAuthorizeRequestUri(
+        string requestUri = await IdpService.GetAuthorizeRequestUri(
             requestState.ProviderId, state, requestState.CodeVerifier,
             requestState.Nonce);
 

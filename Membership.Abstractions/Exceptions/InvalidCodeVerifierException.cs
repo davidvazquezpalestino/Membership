@@ -1,8 +1,16 @@
 ﻿namespace Membership.Abstractions.Exceptions;
 public class InvalidCodeVerifierException : Exception
 {
-    public InvalidCodeVerifierException() { }
-    public InvalidCodeVerifierException(string message) : base(message) { }
-    public InvalidCodeVerifierException(string message, Exception innerException) : base(message, innerException) { }
+    public InvalidCodeVerifierException()
+    {
+    }
+
+    public InvalidCodeVerifierException(string message) : base(message)
+    {
+    }
+
+    public InvalidCodeVerifierException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
 
 }

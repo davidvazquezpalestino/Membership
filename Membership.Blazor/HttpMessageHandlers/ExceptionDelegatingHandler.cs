@@ -1,12 +1,13 @@
 ﻿namespace Membership.Blazor.HttpMessageHandlers;
 internal class ExceptionDelegatingHandler : DelegatingHandler
 {
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    protected override async Task<HttpResponseMessage> SendAsync(
+        HttpRequestMessage request, CancellationToken cancellationToken)
     {
         HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            string errorMessage = await response.Content.ReadAsStringAsync(cancellationToken);
+            string errorMessage = await response.Content.ReadAsStringAsync();
             string source = null;
             string message = null;
             IEnumerable<MembershipError> errors = null;
@@ -26,17 +27,17 @@ internal class ExceptionDelegatingHandler : DelegatingHandler
                             message = titleValue.ToString();
                         }
 
-                        if (jsonResponse.TryGetProperty("errors", out JsonElement errorsValue))
+                        if (jsonResponse.TryGetProperty("errors",
+                                out JsonElement errorsValue))
                         {
-                            errors = errorsValue.Deserialize<IEnumerable<MembershipError>>();
+                            errors = JsonSerializer
+                                .Deserialize<IEnumerable<MembershipError>>(errorsValue);
                         }
-
                         isValidProblemDetails = true;
                     }
                 }
             }
             catch { }
-
             if (!isValidProblemDetails)
             {
                 message = errorMessage;

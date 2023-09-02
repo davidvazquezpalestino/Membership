@@ -1,17 +1,17 @@
 ﻿@if (IDPs != null && IDPs.Any())
 {
     <section @attributes=Attributes>
-        @foreach (var Item in IDPs)
+        @foreach (ExternalIdpInfo item in IDPs)
         {
-            <span @onclick=@(()=> BuildUrl(Item.ProviderId))>
+            <span @onclick=@(()=> BuildUrl(item.ProviderId))>
                 @if (ButtonContent != null)
                 {
-                    <text>@ButtonContent(Item.ProviderId)</text>
+                    <text>@ButtonContent(item.ProviderId)</text>
                 }
                 else
                 {
                     <div class="linkButton">
-                        <img src="@ImagePath(Item)">@Item.ProviderId
+                        <img src="@ImagePath(item)">@item.ProviderId
                     </div>
                 }
             </span>

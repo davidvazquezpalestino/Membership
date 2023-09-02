@@ -1,5 +1,5 @@
 ﻿namespace Membership.Blazor.ValueObjects;
-public class ExternalIDPInfo
+public class ExternalIdpInfo
 {
     public string ProviderId { get; set; }
     public string ImagePath { get; set; }

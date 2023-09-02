@@ -10,5 +10,8 @@ public class MembershipError
         Description = description;
     }
 
-    public override string ToString() => $"{Code}: {Description}";
+    public override string ToString()
+    {
+        return $"{Code}: {Description}";
+    }
 }

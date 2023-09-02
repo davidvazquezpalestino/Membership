@@ -26,20 +26,26 @@ public class ExternalCallbackEndpointBase : ComponentBase
         try
         {
             TokenServiceResponse response = await TokenService.GetTokensAsync(State, Code);
-            string action = response.Scope[..response.Scope.IndexOf("_")];
-            
+            string action = response.Scope[..response.Scope.IndexOf("_", StringComparison.Ordinal)];
             if (Enum.TryParse<ScopeAction>(action, out ScopeAction scopeAction))
             {
                 switch (scopeAction)
                 {
                     case ScopeAction.Register:
                     case ScopeAction.Login:
-                        await AuthenticationStateProvider.LoginAsync(response.Tokens);
+                        await AuthenticationStateProvider.LoginAsync(
+                            response.Tokens);
                         break;
                 }
             }
-
-            NavigationManager.NavigateTo(string.IsNullOrWhiteSpace(response.ReturnUri) ? "" : response.ReturnUri);
+            if (string.IsNullOrWhiteSpace(response.ReturnUri))
+            {
+                NavigationManager.NavigateTo("");
+            }
+            else
+            {
+                NavigationManager.NavigateTo(response.ReturnUri);
+            }
         }
         catch (HttpRequestException ex)
         {
@@ -60,5 +66,7 @@ public class ExternalCallbackEndpointBase : ComponentBase
         }
     }
 
-    protected virtual void OnError(string message, IEnumerable<MembershipError> errors){ }
+    protected virtual void OnError(string message,
+        IEnumerable<MembershipError> errors)
+    { }
 }

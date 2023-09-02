@@ -17,18 +17,18 @@ public partial class ExternalIDPsButtons
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object> Attributes { get; set; }
 
-    ExternalIDPInfo[] IDPs => AuthorizeService.IDPInfos;
+    ExternalIdpInfo[] IDPs => AuthorizeService.IDPs;
 
     string ContentPath =>
         $"_content/{this.GetType().Assembly.GetName().Name}";
 
-    string ImagePath(ExternalIDPInfo idpInfo) =>
+    string ImagePath(ExternalIdpInfo idpInfo) =>
         string.IsNullOrWhiteSpace(idpInfo.ImagePath) ?
         $"{ContentPath}/images/idps/{idpInfo.ProviderId}.png" :
         idpInfo.ImagePath;
 
-    async void BuildUrl(string providerId)
+    async void BuildUrl(string idp)
     {
-        await AuthorizeService.AuthorizeAsync(providerId, ScopeAction, ReturnUri);
+        await AuthorizeService.AuthorizeAsync(idp, ScopeAction, ReturnUri);
     }
 }

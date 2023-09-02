@@ -1,7 +1,10 @@
-﻿namespace Membership.UserManagerService.AspNetIdentity.Services;
+﻿using Membership.Shared.ValueObjects;
+
+namespace Membership.UserManagerService.AspNetIdentity.Services;
 internal partial class UserManagerService
 {
-    public async Task<IEnumerable<MembershipError>> RegisterExternalUserAsync(ExternalUserEntity user)
+    public async Task<IEnumerable<MembershipError>> RegisterExternalUserAsync(
+        ExternalUserEntity user)
     {
         IEnumerable<MembershipError> errors = null;
         IdentityResult result = null;
@@ -33,7 +36,7 @@ internal partial class UserManagerService
                 user.LoginProvider));
         }
 
-        if (result is { Succeeded: false })
+        if (!result.Succeeded)
         {
             errors = ErrorsHandler.Handle(result.Errors);
         }
@@ -41,7 +44,8 @@ internal partial class UserManagerService
         return errors;
     }
 
-    public async Task<UserEntity> GetUserByExternalCredentialsAsync(ExternalUserCredentials userCredentials)
+    public async Task<UserEntity> GetUserByExternalCredentialsAsync(
+        ExternalUserCredentials userCredentials)
     {
         UserEntity foundUser = default;
         User user = await UserManager.FindByLoginAsync(

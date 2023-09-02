@@ -15,12 +15,12 @@ internal class RefreshTokenPresenter : IRefreshTokenOutputPort
 
     public async Task HandleAccessTokenAsync(string accessToken)
     {
-        string accessTokenAsync =
+        string token =
             await AccessTokenService.RotateAccessTokenAsync(accessToken);
 
         string refreshToken =
-            await RefreshTokenService.GetRefreshTokenForAccessTokenAsync(accessTokenAsync);
+            await RefreshTokenService.GetRefreshTokenForAccessTokenAsync(token);
 
-        UserTokens = new UserTokensDto(accessTokenAsync, refreshToken);
+        UserTokens = new UserTokensDto(token, refreshToken);
     }
 }

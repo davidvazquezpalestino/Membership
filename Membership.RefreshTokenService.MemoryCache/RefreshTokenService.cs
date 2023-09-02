@@ -21,9 +21,9 @@ internal class RefreshTokenService : IRefreshTokenService
         string refreshToken = GenerateToken();
         RefreshTokenInfo refreshTokenInfo = new(accessToken,
             DateTime.UtcNow.AddMinutes(JwtOptions.RefreshTokenExpireInMinutes));
-       
         Cache.Set(refreshToken, refreshTokenInfo,
-            DateTime.Now.AddMinutes(JwtOptions.RefreshTokenExpireInMinutes + 5));
+            DateTime.Now.AddMinutes(
+                JwtOptions.RefreshTokenExpireInMinutes + 5));
         return Task.FromResult(refreshToken);
     }
 

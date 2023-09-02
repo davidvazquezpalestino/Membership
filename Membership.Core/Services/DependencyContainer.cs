@@ -7,7 +7,7 @@ public static class DependencyContainer
         this IServiceCollection services,
         Action<JwtOptions> jwtOptionsSetter,
         Action<AppClientInfoOptions> appClientInfoOptionsSetter,
-        Action<IDPClientInfoOptions> iDPClientInfoOptionsSetter)
+        Action<IDPClientInfoOptions> iDpClientInfoOptionsSetter)
     {
         services.AddHttpContextAccessor();
         services.AddSingleton<IUserService, UserService>();
@@ -23,8 +23,8 @@ public static class DependencyContainer
         // Para IIDPService
         services.AddHttpClient();
         services.AddOptions<IDPClientInfoOptions>()
-            .Configure(iDPClientInfoOptionsSetter);
-        services.AddSingleton<IIDPService, IDPService>();
+            .Configure(iDpClientInfoOptionsSetter);
+        services.AddSingleton<IIDPService, IdpService>();
 
         // Para IOAuthStateService
         services.TryAddSingleton<IMemoryCache, MemoryCache>();

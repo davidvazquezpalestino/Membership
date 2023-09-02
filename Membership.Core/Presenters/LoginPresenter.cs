@@ -17,7 +17,6 @@ internal class LoginPresenter : ILoginOutputPort
     {
         string accessToken =
             await AccessTokenService.GetNewUserAccessTokenAsync(user);
-       
         string refreshToken =
             await RefreshTokenService.GetRefreshTokenForAccessTokenAsync(accessToken);
         UserTokens = new UserTokensDto(accessToken, refreshToken);

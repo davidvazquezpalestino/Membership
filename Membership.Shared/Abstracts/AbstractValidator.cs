@@ -2,17 +2,17 @@
 public abstract class AbstractValidator<T> : IValidator<T>
 {
     readonly IMembershipMessageLocalizer Localizer;
-    public AbstractValidator(IMembershipMessageLocalizer localizer) =>
+
+    protected AbstractValidator(IMembershipMessageLocalizer localizer) =>
         Localizer = localizer;
 
     public IEnumerable<MembershipError> Validate(T entity)
     {
         List<MembershipError> errors = new();
         PropertyInfo[] properties = typeof(T).GetProperties();
-       
         foreach (PropertyInfo property in properties)
         {
-            IEnumerable<MembershipError> propertyErrors = ValidateProperty(entity, property.Name).ToList();
+            IEnumerable<MembershipError> propertyErrors = (List<MembershipError>)ValidateProperty(entity, property.Name);
             if (propertyErrors.Any())
             {
                 errors.AddRange(propertyErrors);
@@ -21,7 +21,8 @@ public abstract class AbstractValidator<T> : IValidator<T>
         return errors;
     }
 
-    protected abstract void ValidatePropertyRules(T entity, string propertyName, List<MembershipError> errors);
+    protected abstract void ValidatePropertyRules(T entity, string propertyName,
+        List<MembershipError> errors);
 
     public IEnumerable<MembershipError> ValidateProperty(T entity, string propertyName)
     {
@@ -30,7 +31,8 @@ public abstract class AbstractValidator<T> : IValidator<T>
         return errors;
     }
 
-    protected bool ValidateRule(Func<bool> predicate, string propertyName, string errorMessageKey, List<MembershipError> errors)
+    protected bool ValidateRule(Func<bool> predicate, string propertyName,
+        string errorMessageKey, List<MembershipError> errors)
     {
         bool result = true;
         if (!predicate())

@@ -1,13 +1,13 @@
 ﻿using System.Security.Claims;
 
 namespace Membership.Blazor.AuthenticationStateProviders;
-internal class JWTAuthenticationStateProvider : AuthenticationStateProvider,
+internal class JwtAuthenticationStateProvider : AuthenticationStateProvider,
     IAuthenticationStateProvider
 {
     readonly IUserWebApiGateway UserWebApiGateway;
     readonly ITokensRepository TokensRepository;
 
-    public JWTAuthenticationStateProvider(IUserWebApiGateway userWebApiGateway, 
+    public JwtAuthenticationStateProvider(IUserWebApiGateway userWebApiGateway, 
         ITokensRepository tokensRepository)
     {
         UserWebApiGateway = userWebApiGateway;
@@ -16,7 +16,7 @@ internal class JWTAuthenticationStateProvider : AuthenticationStateProvider,
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        ClaimsIdentity claimsIdentity = new ClaimsIdentity();
+        ClaimsIdentity identity = new ClaimsIdentity();
 
         UserTokensDto storedTokens = await GetUserTokensAsync();
         if(storedTokens != null )
@@ -24,9 +24,9 @@ internal class JWTAuthenticationStateProvider : AuthenticationStateProvider,
             JwtSecurityToken token = new JwtSecurityTokenHandler()
                 .ReadJwtToken(storedTokens.AccessToken);
 
-            claimsIdentity = new ClaimsIdentity(token.Claims, "Bearer");
+            identity = new ClaimsIdentity(token.Claims, "Bearer");
         }
-        return new AuthenticationState(new ClaimsPrincipal(claimsIdentity));
+        return new AuthenticationState(new ClaimsPrincipal(identity));
     }
 
     public async Task<UserTokensDto> GetUserTokensAsync()

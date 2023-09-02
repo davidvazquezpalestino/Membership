@@ -14,7 +14,8 @@ internal class BearerTokenHandler : DelegatingHandler
         UserTokensDto storedTokens = await Provider.GetUserTokensAsync();
         if (storedTokens != null)
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", storedTokens.AccessToken);
+            request.Headers.Authorization =
+                new AuthenticationHeaderValue("Bearer", storedTokens.AccessToken);
         }
 
         return await base.SendAsync(request, cancellationToken);

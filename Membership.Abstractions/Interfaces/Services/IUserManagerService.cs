@@ -11,41 +11,41 @@ public interface IUserManagerService
 
     async Task ThrowIfUnableToRegisterUserAsync(UserDto user)
     {
-        IEnumerable<MembershipError> Errors = await RegisterUserAsync(user);
-        if (Errors != null && Errors.Any())
+        IEnumerable<MembershipError> errors = await RegisterUserAsync(user);
+        if (errors != null && errors.Any())
         {
-            throw new RegisterUserException(Errors);
+            throw new RegisterUserException(errors);
         }
     }
     async Task ThrowIfUnableToRegisterExternalUserAsync(ExternalUserEntity user)
     {
-        IEnumerable<MembershipError> Errors = await RegisterExternalUserAsync(user);
-        if (Errors != null && Errors.Any())
+        IEnumerable<MembershipError> errors = await RegisterExternalUserAsync(user);
+        if (errors != null && errors.Any())
         {
-            throw new RegisterUserException(Errors);
+            throw new RegisterUserException(errors);
         }
     }
 
     async Task<UserEntity> ThrowIfUnableToGetUserByCredentialsAsync(
         UserCredentialsDto userCredentials)
     {
-        UserEntity User = await GetUserByCredentialsAsync(userCredentials);
-        if (User == default)
+        UserEntity user = await GetUserByCredentialsAsync(userCredentials);
+        if (user == default)
         {
             throw new LoginUserException();
         }
 
-        return User;
+        return user;
     }
     async Task<UserEntity> ThrowIfUnableToGetUserByExternalCredentialsAsync(
         ExternalUserCredentials userCredentials)
     {
-        UserEntity User = await GetUserByExternalCredentialsAsync(userCredentials);
-        if (User == default)
+        UserEntity user = await GetUserByExternalCredentialsAsync(userCredentials);
+        if (user == default)
         {
             throw new LoginUserException();
         }
 
-        return User;
+        return user;
     }
 }

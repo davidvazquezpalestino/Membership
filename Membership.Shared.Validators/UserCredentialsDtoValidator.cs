@@ -3,7 +3,8 @@ internal class UserCredentialsDtoValidator : AbstractValidator<UserCredentialsDt
 {
     public UserCredentialsDtoValidator(IMembershipMessageLocalizer localizer) : base(localizer) { }
 
-    protected override void ValidatePropertyRules(UserCredentialsDto entity, string propertyName, List<MembershipError> errors)
+    protected override void ValidatePropertyRules(UserCredentialsDto entity,
+        string propertyName, List<MembershipError> errors)
     {
         switch(propertyName)
         {

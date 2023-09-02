@@ -25,12 +25,13 @@ public class MembershipValidator<T> : ComponentBase
 
     void HandleErrors(object model, IEnumerable<MembershipError> errors)
     {
-        List<MembershipError> membershipErrors = errors.ToList();
-        if (membershipErrors.Any())
+        if (errors != null && errors.Any())
         {
-            foreach (MembershipError error in membershipErrors)
+            foreach (MembershipError error in errors)
             {
-                ValidationMessageStore.Add(new FieldIdentifier(model, error.Code), error.Description);
+                ValidationMessageStore.Add(
+                    new FieldIdentifier(model, error.Code),
+                    error.Description);
             }
         }
     }
@@ -46,7 +47,9 @@ public class MembershipValidator<T> : ComponentBase
     {
         FieldIdentifier fieldIdentifier = e.FieldIdentifier;
         ValidationMessageStore.Clear(fieldIdentifier);
-        IEnumerable<MembershipError> result = Validator.ValidateProperty((T)fieldIdentifier.Model, fieldIdentifier.FieldName);
+        IEnumerable<MembershipError> result =
+            Validator.ValidateProperty((T)fieldIdentifier.Model,
+            fieldIdentifier.FieldName);
         HandleErrors(fieldIdentifier.Model, result);
     }
 
@@ -54,8 +57,8 @@ public class MembershipValidator<T> : ComponentBase
     {
         if (ex.Data.Contains("Errors"))
         {
-            IEnumerable<MembershipError> errors = (List<MembershipError>)ex.Data["Errors"];
-            
+            IEnumerable<MembershipError> errors = ex.Data["Errors"] as
+                IEnumerable<MembershipError>;
             if (errors != null && errors.Any())
             {
                 ValidationMessageStore.Clear();
@@ -64,4 +67,5 @@ public class MembershipValidator<T> : ComponentBase
             }
         }
     }
+
 }

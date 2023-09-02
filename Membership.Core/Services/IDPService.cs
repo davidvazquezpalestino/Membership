@@ -1,28 +1,29 @@
 ﻿namespace Membership.Core.Services;
-internal class IDPService : IIDPService
+internal class IdpService : IIDPService
 {
     readonly HttpClient Client;
     readonly IOAuthService OAuthService;
-    readonly IDPClientInfoOptions ClientIDPInfoOptions;
-    readonly ILogger<IDPService> Logger;
+    readonly IDPClientInfoOptions ClientIdpInfoOptions;
+    readonly ILogger<IdpService> Logger;
 
-    public IDPService(IHttpClientFactory httpClientFactory,
+    public IdpService(IHttpClientFactory httpClientFactory,
         IOAuthService oAuthService,
-        IOptions<IDPClientInfoOptions> clientIDPInfoOptions,
-        ILogger<IDPService> logger)
+        IOptions<IDPClientInfoOptions> clientIdpInfoOptions,
+        ILogger<IdpService> logger)
     {
         Client = httpClientFactory.CreateClient();
         OAuthService = oAuthService;
-        ClientIDPInfoOptions = clientIDPInfoOptions.Value;
+        ClientIdpInfoOptions = clientIdpInfoOptions.Value;
         Logger = logger;
     }
 
-    public Task<string> GetAuthorizeRequestUri(string providerId, string state, string codeVerifier, string nonce)
+    public Task<string> GetAuthorizeRequestUri(
+        string providerId, string state, string codeVerifier, string nonce)
     {
         string result = null;
 
-        IDPClientInfo info = ClientIDPInfoOptions.IDPClients.FirstOrDefault(
-            clientInfo => clientInfo.ProviderId == providerId);
+        IDPClientInfo info = ClientIdpInfoOptions.IDPClients.FirstOrDefault(
+            p => p.ProviderId == providerId);
 
         if (info != null)
         {
@@ -49,13 +50,18 @@ internal class IDPService : IIDPService
         return Task.FromResult(result);
     }
 
-    public async Task<IDPTokens> GetTokensAsync(string providerId, string authorizationCode, string codeVerifier, string nonce)
+    public async Task<IDPTokens> GetTokensAsync(string providerId,
+        string authorizationCode,
+        string codeVerifier, string nonce)
     {
         IDPTokens tokens = null;
-        IDPClientInfo info = ClientIDPInfoOptions.IDPClients.FirstOrDefault(clientInfo => clientInfo.ProviderId == providerId);
+        IDPClientInfo info = ClientIdpInfoOptions.IDPClients.FirstOrDefault(
+            p => p.ProviderId == providerId);
 
         FormUrlEncodedContent requestBody = OAuthService.BuildTokenRequestBody(
-            new TokenRequestInfo(authorizationCode, info.RedirectUri, info.ClientId, info.Scope, codeVerifier, info.ClientSecret));
+            new TokenRequestInfo(
+            authorizationCode, info.RedirectUri, info.ClientId, info.Scope,
+            codeVerifier, info.ClientSecret));
 
         HttpResponseMessage response = await Client.PostAsync(info.TokenEndpoint, requestBody);
         JsonElement jsonContentResponse =
@@ -70,8 +76,8 @@ internal class IDPService : IIDPService
                 // Requiere el paquete NuGet: System.IdentityModel.Tokens.Jwt
                 JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
                 JwtSecurityToken jwtToken = handler.ReadJwtToken(idTokenToVerify);
-                string idTokenNonce = jwtToken.Claims.FirstOrDefault(claim => claim.Type == "nonce")?.Value;
-
+                string idTokenNonce = jwtToken.Claims.FirstOrDefault(
+                    c => c.Type == "nonce")?.Value;
                 if (idTokenNonce != null && idTokenNonce == nonce)
                 {
                     tokens = new()

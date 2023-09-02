@@ -51,11 +51,17 @@ internal class TokenInteractor : ITokenInputPort
         JwtSecurityToken identityToken = new JwtSecurityTokenHandler()
             .ReadJwtToken(stateInfo.Tokens.IdToken);
 
-        string firstName = identityToken.Claims.FirstOrDefault(claim => claim.Type == "given_name")?.Value;
-        string lastName = identityToken.Claims.FirstOrDefault(claim => claim.Type == "family_name")?.Value;
-        string name = identityToken.Claims.FirstOrDefault(claim => claim.Type == "name")?.Value;
-        string sub = identityToken.Claims.FirstOrDefault(claim => claim.Type == "sub")?.Value;
-        string email = identityToken.Claims.FirstOrDefault(claim => claim.Type == "email")?.Value;
+        string firstName = identityToken.Claims.FirstOrDefault(
+            c => c.Type == "given_name")?.Value;
+        string lastName = identityToken.Claims.FirstOrDefault(
+            c => c.Type == "family_name")?.Value;
+        string name = identityToken.Claims.FirstOrDefault(
+            c => c.Type == "name")?.Value;
+        string sub = identityToken.Claims.FirstOrDefault(
+            c => c.Type == "sub")?.Value;
+
+        string email = identityToken.Claims.FirstOrDefault(
+            c => c.Type == "email")?.Value;
 
         if (string.IsNullOrEmpty(email))
         {
@@ -91,7 +97,8 @@ internal class TokenInteractor : ITokenInputPort
             default:
                 throw new InvalidScopeActionException();
         }
-        userEntity.Claims = new List<Claim> { new Claim("nonce", stateInfo.AppClientStateInfo.Nonce) };
+        userEntity.Claims = new List<Claim> { new Claim("nonce", 
+            stateInfo.AppClientStateInfo.Nonce) };
         await Presenter.HandleUserEntityAsync(userEntity);
     }
 }

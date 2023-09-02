@@ -19,11 +19,11 @@
 @code{
     string GetUserInfo(AuthenticationState context)
     {
-        string Info = string.Empty;
+        string info = string.Empty;
         if(context.User.Identity.IsAuthenticated)
         {
-            Info = context.User.FindFirst(c => c.Type == "FullName").Value;
+            info = context.User.FindFirst(c => c.Type == "FullName").Value;
         }
-        return Info;
+        return info;
     }
 }

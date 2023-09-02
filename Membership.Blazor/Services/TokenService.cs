@@ -20,6 +20,8 @@ internal class TokenService
 
     public async Task<TokenServiceResponse> GetTokensAsync(string state, string code)
     {
+        TokenServiceResponse result;
+
         if (code == null || state == null)
         {
             throw new Exception(
@@ -41,15 +43,15 @@ internal class TokenService
             await Client.PostAsync(AppOptions.Value.TokenEndpoint, requestBody);
 
         UserTokensDto tokens = await response.Content.ReadFromJsonAsync<UserTokensDto>();
-        JwtSecurityToken jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(tokens.AccessToken);
-        
+        JwtSecurityToken jwtToken = new JwtSecurityTokenHandler()
+            .ReadJwtToken(tokens.AccessToken);
         string tokenNonce = jwtToken.Claims.FirstOrDefault(c => c.Type == "nonce")?.Value;
         if (tokenNonce == null || tokenNonce != stateInfo.Nonce)
         {
             throw new Exception(Localizer[MessageKeys.InvalidNonceValue]);
         }
 
-        TokenServiceResponse result = new()
+        result = new()
         {
             Tokens = tokens,
             ReturnUri = stateInfo.ReturnUri,

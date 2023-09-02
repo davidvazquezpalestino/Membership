@@ -4,7 +4,7 @@ internal class UserManagerServiceContextFactory :
 {
     public UserManagerServiceContext CreateDbContext(string[] args)
     {
-        string ConnectionString = args.Length == 0 ? "" : args[0];
+        string connectionString = args.Length == 0 ? "" : args[0];
 
         if (args.Length == 0)
         {
@@ -19,7 +19,7 @@ internal class UserManagerServiceContextFactory :
             Microsoft.Extensions.Options.Options.Create(
                 new AspNetIdentityOptions
                 {
-                    ConnectionString = ConnectionString
+                    ConnectionString = connectionString
                 }));
     }
 }

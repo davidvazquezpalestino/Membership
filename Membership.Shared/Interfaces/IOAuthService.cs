@@ -10,6 +10,7 @@ public interface IOAuthService
     string GetState();
     string BuildAuthorizeRequestUri(AuthorizeRequestInfo info);
     FormUrlEncodedContent BuildTokenRequestBody(TokenRequestInfo info);
+
     TokenRequestInfo GetTokenRequestInfoFromRequestBody(Dictionary<string, string> requestBody);
 }
 

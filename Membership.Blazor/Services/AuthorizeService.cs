@@ -16,12 +16,13 @@ internal class AuthorizeService: IAuthorizeService
         NavigationManager = navigationManager;
     }
 
-    public ExternalIDPInfo[] IDPInfos => AppOptions.Value.IDPInfos;
+    public ExternalIdpInfo[] IDPs => AppOptions.Value.IDPs;
 
     public async Task AuthorizeAsync(string providerId, ScopeAction action,
         string returnUri)
     {
-        StateInfo stateInfo = new StateInfo(OAuthService.GetState(), OAuthService.GetCodeVerifier(),
+        StateInfo stateInfo = new StateInfo(
+            OAuthService.GetState(), OAuthService.GetCodeVerifier(),
             OAuthService.GetNonce(), $"{action}_{providerId}", returnUri);
 
         AuthorizeRequestInfo requestData = new AuthorizeRequestInfo(
@@ -39,4 +40,5 @@ internal class AuthorizeService: IAuthorizeService
         NavigationManager.NavigateTo(
             OAuthService.BuildAuthorizeRequestUri(requestData));
     }
+
 }

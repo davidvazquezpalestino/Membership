@@ -1,5 +1,5 @@
 ﻿namespace Membership.Abstractions.Interfaces.Login;
 public interface ILoginInputPort
 {
-    Task LogingAsync(UserCredentialsDto userCredentialsDto);
+    Task LogingAsync(UserCredentialsDto userCredentials);
 }

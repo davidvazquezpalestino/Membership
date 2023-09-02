@@ -5,7 +5,7 @@ public static class DependencyContainer
         this IServiceCollection services)
     {
         services.AddScoped<IAuthenticationStateProvider, 
-            JWTAuthenticationStateProvider> ();
+            JwtAuthenticationStateProvider> ();
 
         services.AddScoped(provider => (AuthenticationStateProvider)
         provider.GetRequiredService<IAuthenticationStateProvider>());
