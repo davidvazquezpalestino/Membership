@@ -9,9 +9,8 @@ public static class DependencyContainer
         app.UseExceptionHandler(builder =>
         {
             builder.Run(async (context) =>
-            await MembershipExceptionHandler.WriteResponse(
-                context, app.ApplicationServices
-                .GetRequiredService<IMembershipMessageLocalizer>()));
+            await MembershipExceptionHandler.WriteResponse(context,
+                app.ApplicationServices.GetRequiredService<IMembershipMessageLocalizer>()));
         });
 
         return app;
@@ -23,9 +22,7 @@ public static class DependencyContainer
             (RegisterUserException ex,
             IMembershipMessageLocalizer localizer) =>
             new ProblemDetails().FromHttp400BadRequest(
-                localizer[MessageKeys.RegisterUserExceptionMessage],
-                nameof(RegisterUserException),
-                ex.Errors));
+                localizer[MessageKeys.RegisterUserExceptionMessage], nameof(RegisterUserException), ex.Errors));
 
         MembershipExceptionHandler.AddHttp400Handler<LoginUserException>();
         MembershipExceptionHandler.AddHttp400Handler<RefreshTokenCompromisedException>();

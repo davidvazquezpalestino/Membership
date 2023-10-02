@@ -16,13 +16,16 @@
     </NotAuthorized>
 </AuthorizeView>
 
-@code{
+@code {
     string GetUserInfo(AuthenticationState context)
     {
         string info = string.Empty;
-        if(context.User.Identity.IsAuthenticated)
+        if (context.User.Identity != null)
         {
-            info = context.User.FindFirst(c => c.Type == "FullName").Value;
+            if (context.User.Identity.IsAuthenticated)
+            {
+                info = context.User.FindFirst(c => c.Type == "FullName")?.Value;
+            }
         }
         return info;
     }
