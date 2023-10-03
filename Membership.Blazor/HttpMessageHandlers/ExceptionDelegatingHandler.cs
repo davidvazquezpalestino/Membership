@@ -7,7 +7,7 @@ internal class ExceptionDelegatingHandler : DelegatingHandler
         HttpResponseMessage response = await base.SendAsync(request, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
-            string errorMessage = await response.Content.ReadAsStringAsync();
+            string errorMessage = await response.Content.ReadAsStringAsync(cancellationToken);
             string source = null;
             string message = null;
             IEnumerable<MembershipError> errors = null;
@@ -27,11 +27,9 @@ internal class ExceptionDelegatingHandler : DelegatingHandler
                             message = titleValue.ToString();
                         }
 
-                        if (jsonResponse.TryGetProperty("errors",
-                                out JsonElement errorsValue))
+                        if (jsonResponse.TryGetProperty("errors", out JsonElement errorsValue))
                         {
-                            errors = JsonSerializer
-                                .Deserialize<IEnumerable<MembershipError>>(errorsValue);
+                            errors = errorsValue.Deserialize<IEnumerable<MembershipError>>();
                         }
                         isValidProblemDetails = true;
                     }

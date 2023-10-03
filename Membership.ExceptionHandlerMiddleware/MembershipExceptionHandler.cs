@@ -2,24 +2,20 @@
 public static class MembershipExceptionHandler
 {
     static readonly Dictionary<Type, Delegate> ExceptionHandlers = new();
-    public static void AddHandler(Type exceptionType, Delegate @delegate) =>
-        ExceptionHandlers.TryAdd(exceptionType, @delegate);
+    public static void AddHandler(Type exceptionType, Delegate delegat) =>
+        ExceptionHandlers.TryAdd(exceptionType, delegat);
 
     public static void AddHttp400Handler<T>()
     {
         string exceptionTypeName = typeof(T).Name;
-        ExceptionHandlers.TryAdd(typeof(T),
-            (T ex, IMembershipMessageLocalizer localizer) =>
-            new ProblemDetails().FromHttp400BadRequest(
-                localizer[$"{exceptionTypeName}Message"],
-                exceptionTypeName));
+
+        ExceptionHandlers.TryAdd(typeof(T), (T ex, IMembershipMessageLocalizer localizer) =>
+            new ProblemDetails().FromHttp400BadRequest(localizer[$"{exceptionTypeName}Message"], exceptionTypeName));
     }
 
-    public static async Task<bool> WriteResponse(
-        HttpContext context, IMembershipMessageLocalizer localizer)
+    public static async Task<bool> WriteResponse(HttpContext context, IMembershipMessageLocalizer localizer)
     {
-        IExceptionHandlerFeature exceptionDetail =
-            context.Features.Get<IExceptionHandlerFeature>();
+        IExceptionHandlerFeature exceptionDetail = context.Features.Get<IExceptionHandlerFeature>();
 
         Exception exceptionError = exceptionDetail?.Error;
 
@@ -27,12 +23,9 @@ public static class MembershipExceptionHandler
 
         if (exceptionError != null)
         {
-            if (ExceptionHandlers.TryGetValue(exceptionError.GetType(),
-                out Delegate handler))
+            if (ExceptionHandlers.TryGetValue(exceptionError.GetType(), out Delegate handler))
             {
-                await WriteProblemDetailsAsync(context,
-                    handler.DynamicInvoke(exceptionError, localizer)
-                    as ProblemDetails);
+                await WriteProblemDetailsAsync(context, handler.DynamicInvoke(exceptionError, localizer) as ProblemDetails);
             }
             else
             {
