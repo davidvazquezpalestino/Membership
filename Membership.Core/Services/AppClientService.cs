@@ -10,8 +10,7 @@ internal class AppClientService : IAppClientService
 
     public void ThrowIfNotExist(string clientId, string redirectUri)
     {
-        if (!AppClientsInfo.AppClients
-            .Any(c => c.ClientId == clientId && c.RedirectUri == redirectUri))
+        if (!AppClientsInfo.AppClients.Any(clientInfo => clientInfo.ClientId == clientId && clientInfo.RedirectUri == redirectUri))
         {
             throw new UnauthorizedAccessException();
         }

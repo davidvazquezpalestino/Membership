@@ -111,6 +111,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMembershipEndpoints();
+builder.Host.ConfigureLogging(logging =>
+{
+   // logging.ClearProviders();
+    logging.AddConsole();
+});
 
 app.MapGet("/authorizeduser", (HttpContext context,
     IUserService userService) =>

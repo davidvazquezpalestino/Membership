@@ -7,9 +7,13 @@ public partial class Register
 {
     [Inject]
     NavigationManager NavigationManager { get; set; }
+    
+    [Inject]
+    ILogger<Register> Logger { get; set; }
+
     void OnRegister(UserDto user)
     {
-        Console.WriteLine($"Usuario registrado: {user.FirstName} {user.LastName}");
+        Logger.LogInformation($"Usuario registrado: {user.FirstName} {user.LastName}");
         NavigationManager.NavigateTo("user/login");
     }
 }

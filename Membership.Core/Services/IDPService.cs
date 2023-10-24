@@ -17,13 +17,10 @@ internal class IdpService : IIDPService
         Logger = logger;
     }
 
-    public Task<string> GetAuthorizeRequestUri(
-        string providerId, string state, string codeVerifier, string nonce)
+    public Task<string> GetAuthorizeRequestUri(string providerId, string state, string codeVerifier, string nonce)
     {
         string result = null;
-
-        IDPClientInfo info = ClientIdpInfoOptions.IDPClients.FirstOrDefault(
-            p => p.ProviderId == providerId);
+        IDPClientInfo info = ClientIdpInfoOptions.IDPClients.FirstOrDefault(clientInfo => clientInfo.ProviderId == providerId);
 
         if (info != null)
         {
@@ -42,8 +39,7 @@ internal class IdpService : IIDPService
 
             AuthorizeRequestInfo requestInfo = new(info.AuthorizeEndpoint,
                 info.ClientId, info.RedirectUri, state, info.Scope,
-                codeChallenge,
-                codeChallengeMethod, nonce);
+                codeChallenge, codeChallengeMethod, nonce);
 
             result = OAuthService.BuildAuthorizeRequestUri(requestInfo);
         }
@@ -55,17 +51,13 @@ internal class IdpService : IIDPService
         string codeVerifier, string nonce)
     {
         IDPTokens tokens = null;
-        IDPClientInfo info = ClientIdpInfoOptions.IDPClients.FirstOrDefault(
-            p => p.ProviderId == providerId);
+        IDPClientInfo info = ClientIdpInfoOptions.IDPClients.FirstOrDefault(clientInfo => clientInfo.ProviderId == providerId);
 
         FormUrlEncodedContent requestBody = OAuthService.BuildTokenRequestBody(
-            new TokenRequestInfo(
-            authorizationCode, info.RedirectUri, info.ClientId, info.Scope,
-            codeVerifier, info.ClientSecret));
+            new TokenRequestInfo(authorizationCode, info.RedirectUri, info.ClientId, info.Scope, codeVerifier, info.ClientSecret));
 
         HttpResponseMessage response = await Client.PostAsync(info.TokenEndpoint, requestBody);
-        JsonElement jsonContentResponse =
-            await response.Content.ReadFromJsonAsync<JsonElement>();
+        JsonElement jsonContentResponse = await response.Content.ReadFromJsonAsync<JsonElement>();
 
         if (response.IsSuccessStatusCode)
         {
@@ -76,8 +68,8 @@ internal class IdpService : IIDPService
                 // Requiere el paquete NuGet: System.IdentityModel.Tokens.Jwt
                 JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
                 JwtSecurityToken jwtToken = handler.ReadJwtToken(idTokenToVerify);
-                string idTokenNonce = jwtToken.Claims.FirstOrDefault(
-                    c => c.Type == "nonce")?.Value;
+
+                string idTokenNonce = jwtToken.Claims.FirstOrDefault(claim => claim.Type == "nonce")?.Value;
                 if (idTokenNonce != null && idTokenNonce == nonce)
                 {
                     tokens = new()
@@ -85,8 +77,7 @@ internal class IdpService : IIDPService
                         IdToken = idTokenToVerify
                     };
 
-                    if (jsonContentResponse.TryGetProperty("access_token",
-                        out JsonElement accessTokenJson))
+                    if (jsonContentResponse.TryGetProperty("access_token", out JsonElement accessTokenJson))
                     {
                         tokens.AccessToken = accessTokenJson.ToString();
                     }

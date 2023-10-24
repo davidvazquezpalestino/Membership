@@ -21,8 +21,7 @@ internal class LoginInteractor : ILoginInputPort
             throw new LoginUserException();
         }
 
-        UserEntity user = await UserManagerService.
-            ThrowIfUnableToGetUserByCredentialsAsync(userCredentials);
+        UserEntity user = await UserManagerService.ThrowIfUnableToGetUserByCredentialsAsync(userCredentials);
 
         await OutputPort.HandleUserEntityAsync(user);
     }

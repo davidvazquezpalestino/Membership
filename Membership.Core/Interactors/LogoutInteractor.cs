@@ -2,7 +2,6 @@
 internal class LogoutInteractor : ILogoutInputPort
 {
     readonly IRefreshTokenService RefreshTokenService;
-
     public LogoutInteractor(IRefreshTokenService refreshTokenService)
     {
         RefreshTokenService = refreshTokenService;

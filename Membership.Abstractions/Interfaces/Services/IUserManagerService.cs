@@ -2,12 +2,10 @@
 public interface IUserManagerService
 {
     Task<IEnumerable<MembershipError>> RegisterUserAsync(UserDto userDto);
-    Task<IEnumerable<MembershipError>> RegisterExternalUserAsync(
-        ExternalUserEntity user);
+    Task<IEnumerable<MembershipError>> RegisterExternalUserAsync(ExternalUserEntity user);
 
     Task<UserEntity> GetUserByCredentialsAsync(UserCredentialsDto userCredentials);
-    Task<UserEntity> GetUserByExternalCredentialsAsync(
-        ExternalUserCredentials userCredentials);
+    Task<UserEntity> GetUserByExternalCredentialsAsync(ExternalUserCredentials userCredentials);
 
     async Task ThrowIfUnableToRegisterUserAsync(UserDto user)
     {
@@ -26,8 +24,7 @@ public interface IUserManagerService
         }
     }
 
-    async Task<UserEntity> ThrowIfUnableToGetUserByCredentialsAsync(
-        UserCredentialsDto userCredentials)
+    async Task<UserEntity> ThrowIfUnableToGetUserByCredentialsAsync(UserCredentialsDto userCredentials)
     {
         UserEntity user = await GetUserByCredentialsAsync(userCredentials);
         if (user == default)
@@ -37,8 +34,7 @@ public interface IUserManagerService
 
         return user;
     }
-    async Task<UserEntity> ThrowIfUnableToGetUserByExternalCredentialsAsync(
-        ExternalUserCredentials userCredentials)
+    async Task<UserEntity> ThrowIfUnableToGetUserByExternalCredentialsAsync(ExternalUserCredentials userCredentials)
     {
         UserEntity user = await GetUserByExternalCredentialsAsync(userCredentials);
         if (user == default)

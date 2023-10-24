@@ -16,25 +16,20 @@ internal class AuthorizeInteractor : IAuthorizeInputPort
         OAuthStateService = oAuthStateService;
     }
 
-    public async Task<string> GetAuthorizeRequestRedirectUri(
-        AppClientAuthorizeRequestInfo requestInfo)
+    public async Task<string> GetAuthorizeRequestRedirectUri(AppClientAuthorizeRequestInfo requestInfo)
     {
-        AppClientService.ThrowIfNotExist(requestInfo.ClientId,
-            requestInfo.RedirectUri);
+        AppClientService.ThrowIfNotExist(requestInfo.ClientId, requestInfo.RedirectUri);
 
         string state = OAuthService.GetState();
         StateInfo requestState = new StateInfo
         {
             CodeVerifier = OAuthService.GetCodeVerifier(),
             Nonce = OAuthService.GetNonce(),
-            ProviderId = requestInfo.Scope.Substring(
-                requestInfo.Scope.IndexOf("_", StringComparison.Ordinal) + 1),
+            ProviderId = requestInfo.Scope.Substring(requestInfo.Scope.IndexOf("_", StringComparison.Ordinal) + 1),
             AppClientStateInfo = requestInfo
         };
 
-        string requestUri = await IdpService.GetAuthorizeRequestUri(
-            requestState.ProviderId, state, requestState.CodeVerifier,
-            requestState.Nonce);
+        string requestUri = await IdpService.GetAuthorizeRequestUri(requestState.ProviderId, state, requestState.CodeVerifier, requestState.Nonce);
 
         if (requestUri == null)
         {

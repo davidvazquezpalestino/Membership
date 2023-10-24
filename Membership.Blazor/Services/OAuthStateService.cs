@@ -2,10 +2,12 @@
 internal class OAuthStateService : IOAuthStateService
 {
     readonly IJSRuntime JsRuntime;
+    private readonly ILogger<OAuthStateService> Logger;
 
-    public OAuthStateService(IJSRuntime jSRuntime)
+    public OAuthStateService(IJSRuntime jSRuntime, ILogger<OAuthStateService> logger)
     {
         JsRuntime = jSRuntime;
+        Logger = logger;
     }
 
     public async Task SetAsync<T>(string key, T value)
@@ -20,7 +22,7 @@ internal class OAuthStateService : IOAuthStateService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Logger.LogError(ex.Message);
         }
     }
 
@@ -40,7 +42,7 @@ internal class OAuthStateService : IOAuthStateService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Logger.LogError(ex.Message);
         }
         return value;
     }

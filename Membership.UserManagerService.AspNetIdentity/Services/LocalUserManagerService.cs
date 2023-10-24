@@ -1,6 +1,4 @@
-﻿using Membership.Shared.ValueObjects;
-
-namespace Membership.UserManagerService.AspNetIdentity.Services;
+﻿namespace Membership.UserManagerService.AspNetIdentity.Services;
 internal partial class UserManagerService
 {
     public async Task<IEnumerable<MembershipError>> RegisterUserAsync(UserDto userDto)
@@ -24,8 +22,7 @@ internal partial class UserManagerService
         return errors;
     }
 
-    public async Task<UserEntity> GetUserByCredentialsAsync(
-        UserCredentialsDto userCredentials)
+    public async Task<UserEntity> GetUserByCredentialsAsync(UserCredentialsDto userCredentials)
     {
         UserEntity foundUser = default;
         User user = await UserManager.FindByNameAsync(userCredentials.Email);

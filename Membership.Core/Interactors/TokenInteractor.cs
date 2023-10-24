@@ -79,26 +79,26 @@ internal class TokenInteractor : ITokenInputPort
         switch(action)
         {
             case "register":
-                await UserManagerService.ThrowIfUnableToRegisterExternalUserAsync
-                    (externalUserEntity);
+                await UserManagerService.ThrowIfUnableToRegisterExternalUserAsync(externalUserEntity);
+             
                 userEntity = await UserManagerService
                     .ThrowIfUnableToGetUserByExternalCredentialsAsync(
-                    new ExternalUserCredentials(
-                        externalUserEntity.LoginProvider,
-                        externalUserEntity.ProviderUserId));
+                        new ExternalUserCredentials(externalUserEntity.LoginProvider, externalUserEntity.ProviderUserId));
                 break;
+
             case "login":
                 userEntity = await UserManagerService
                     .ThrowIfUnableToGetUserByExternalCredentialsAsync(
-                    new ExternalUserCredentials(
-                        externalUserEntity.LoginProvider,
-                        externalUserEntity.ProviderUserId));
+                    new ExternalUserCredentials(externalUserEntity.LoginProvider, externalUserEntity.ProviderUserId));
                 break;
             default:
                 throw new InvalidScopeActionException();
         }
-        userEntity.Claims = new List<Claim> { new Claim("nonce", 
-            stateInfo.AppClientStateInfo.Nonce) };
+        userEntity.Claims = new List<Claim> { 
+            new Claim("nonce", 
+            stateInfo.AppClientStateInfo.Nonce)
+        };
+
         await Presenter.HandleUserEntityAsync(userEntity);
     }
 }

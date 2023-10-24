@@ -23,3 +23,5 @@ global using Membership.Blazor.Enums;
 global using Membership.Blazor.Services;
 global using Membership.Shared.ValueObjects;
 global using System.IdentityModel.Tokens.Jwt;
+global using System.Security.Claims;
+global using Microsoft.Extensions.Logging;

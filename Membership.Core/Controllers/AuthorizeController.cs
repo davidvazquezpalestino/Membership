@@ -4,7 +4,7 @@ internal class AuthorizeController
     public static void Map(WebApplication app)
     {
         app.MapGet(MembershipEndpoints.Authorize,
-            async(HttpRequest request, IAuthorizeInputPort inputPort) =>
+            async (HttpRequest request, IAuthorizeInputPort inputPort) =>
             {
                 AppClientAuthorizeRequestInfo requestInfo = new AppClientAuthorizeRequestInfo()
                 {

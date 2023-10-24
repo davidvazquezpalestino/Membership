@@ -9,8 +9,7 @@ internal class AccessTokenService : IAccessTokenService
         Task.FromResult(GetAccessToken(GetUserClaims(user)));
 
     public Task<string> RotateAccessTokenAsync(string accessTokenToRotate) =>
-        Task.FromResult(GetAccessToken(
-            GetUserClaimsFromAccessToken(accessTokenToRotate)));
+        Task.FromResult(GetAccessToken(GetUserClaimsFromAccessToken(accessTokenToRotate)));
 
     string GetAccessToken(List<Claim> userClaims)
     {

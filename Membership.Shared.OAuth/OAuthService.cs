@@ -1,16 +1,13 @@
 ﻿namespace Membership.Shared.OAuth;
 internal class OAuthService : IOAuthService
 {
-    public string GetState() =>
-        GetRandomString(32);
-    public string GetNonce() =>
-        GetRandomString(12);
+    public string GetState() => GetRandomString(32);
+    public string GetNonce() => GetRandomString(12);
 
     public string GetCodeVerifier()
     {
         // https://www.oauth.com/oauth2-servers/pkce/authorization-request/
-        const string possibleChars =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+        const string possibleChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
         StringBuilder sb = new StringBuilder();
         int maxIndex = possibleChars.Length;
         Random randomGenerator = new Random();
@@ -25,8 +22,7 @@ internal class OAuthService : IOAuthService
 
     public string GetHash256CodeChallenge(string codeVerifier)
     {
-        byte[] challengeBytes =
-            SHA256.HashData(Encoding.UTF8.GetBytes(codeVerifier));
+        byte[] challengeBytes = SHA256.HashData(Encoding.UTF8.GetBytes(codeVerifier));
         return Base64UrlEncoder.Encode(challengeBytes);
     }
 
@@ -65,8 +61,7 @@ internal class OAuthService : IOAuthService
         return new FormUrlEncodedContent(bodyData);
     }
 
-    public TokenRequestInfo GetTokenRequestInfoFromRequestBody(
-        Dictionary<string, string> requestBody)
+    public TokenRequestInfo GetTokenRequestInfoFromRequestBody(Dictionary<string, string> requestBody)
     {
         requestBody.TryGetValue("code", out string code);
         requestBody.TryGetValue("redirect_uri", out string redirectUri);
@@ -75,8 +70,7 @@ internal class OAuthService : IOAuthService
         requestBody.TryGetValue("code_verifier", out string codeVerifier);
         requestBody.TryGetValue("client_secret", out string clientSecret);
 
-        return new TokenRequestInfo(code, redirectUri, clientId,
-            scope, codeVerifier, clientSecret);
+        return new TokenRequestInfo(code, redirectUri, clientId, scope, codeVerifier, clientSecret);
 
     }
 

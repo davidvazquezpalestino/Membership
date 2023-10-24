@@ -1,17 +1,16 @@
-﻿using System.Security.Claims;
-
-namespace Membership.Blazor.AuthenticationStateProviders;
-internal class JwtAuthenticationStateProvider : AuthenticationStateProvider,
-    IAuthenticationStateProvider
+﻿namespace Membership.Blazor.AuthenticationStateProviders;
+internal class JwtAuthenticationStateProvider : AuthenticationStateProvider, IAuthenticationStateProvider
 {
     readonly IUserWebApiGateway UserWebApiGateway;
     readonly ITokensRepository TokensRepository;
+    private readonly ILogger<JwtAuthenticationStateProvider> Logger;
 
     public JwtAuthenticationStateProvider(IUserWebApiGateway userWebApiGateway, 
-        ITokensRepository tokensRepository)
+        ITokensRepository tokensRepository, ILogger<JwtAuthenticationStateProvider> logger)
     {
         UserWebApiGateway = userWebApiGateway;
         TokensRepository = tokensRepository;
+        Logger = logger;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -19,7 +18,7 @@ internal class JwtAuthenticationStateProvider : AuthenticationStateProvider,
         ClaimsIdentity identity = new ClaimsIdentity();
 
         UserTokensDto storedTokens = await GetUserTokensAsync();
-        if(storedTokens != null )
+        if (storedTokens != null)
         {
             JwtSecurityToken token = new JwtSecurityTokenHandler()
                 .ReadJwtToken(storedTokens.AccessToken);
@@ -32,7 +31,7 @@ internal class JwtAuthenticationStateProvider : AuthenticationStateProvider,
     public async Task<UserTokensDto> GetUserTokensAsync()
     {
         UserTokensDto storedTokens = await TokensRepository.GetTokensAsync();
-        if(storedTokens != null)
+        if (storedTokens != null)
         {
             JwtSecurityToken token = new JwtSecurityTokenHandler()
                 .ReadJwtToken(storedTokens.AccessToken);
@@ -41,16 +40,16 @@ internal class JwtAuthenticationStateProvider : AuthenticationStateProvider,
             {
                 try
                 {
-                    UserTokensDto newTokens = await UserWebApiGateway
-                        .RefreshTokenAsync(storedTokens);
+                    UserTokensDto newTokens = await UserWebApiGateway.RefreshTokenAsync(storedTokens);
                     await LoginAsync(newTokens);
                     storedTokens = newTokens;
-                    Console.WriteLine("Access token actualizado");
+
+                    Logger.LogInformation("Access token actualizado");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     storedTokens = default;
-                    Console.WriteLine(ex.Message);
+                    Logger.LogError(ex.Message);
                     await LogoutAsync();
                 }
             }
@@ -61,14 +60,13 @@ internal class JwtAuthenticationStateProvider : AuthenticationStateProvider,
     public async Task LoginAsync(UserTokensDto userTokensDto)
     {
         await TokensRepository.SaveTokensAsync(userTokensDto);
-        NotifyAuthenticationStateChanged(
-            GetAuthenticationStateAsync());
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 
     public async Task LogoutAsync()
     {
         await TokensRepository.RemoveTokensAsync();
-        NotifyAuthenticationStateChanged( GetAuthenticationStateAsync());
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
 }
 

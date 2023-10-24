@@ -19,19 +19,16 @@ internal class RefreshTokenService : IRefreshTokenService
     public Task<string> GetRefreshTokenForAccessTokenAsync(string accessToken)
     {
         string refreshToken = GenerateToken();
-        RefreshTokenInfo refreshTokenInfo = new(accessToken,
-            DateTime.UtcNow.AddMinutes(JwtOptions.RefreshTokenExpireInMinutes));
-        Cache.Set(refreshToken, refreshTokenInfo,
-            DateTime.Now.AddMinutes(
-                JwtOptions.RefreshTokenExpireInMinutes + 5));
+        RefreshTokenInfo refreshTokenInfo = new(accessToken, DateTime.UtcNow.AddMinutes(JwtOptions.RefreshTokenExpireInMinutes));
+        
+        Cache.Set(refreshToken, refreshTokenInfo, DateTime.Now.AddMinutes(JwtOptions.RefreshTokenExpireInMinutes + 5));
+        
         return Task.FromResult(refreshToken);
     }
 
-    public Task ThrowIfUnableToRotateRefreshTokenAsync(string refreshToken,
-        string accessToken)
+    public Task ThrowIfUnableToRotateRefreshTokenAsync(string refreshToken, string accessToken)
     {
-        if (Cache.TryGetValue(refreshToken,
-            out RefreshTokenInfo refreshTokenInfo))
+        if (Cache.TryGetValue(refreshToken, out RefreshTokenInfo refreshTokenInfo))
         {
             Cache.Remove(refreshToken);
             if (refreshTokenInfo.AccessToken != accessToken)
@@ -56,8 +53,8 @@ internal class RefreshTokenService : IRefreshTokenService
         // Cada caracter Base64 es de 6 bits
         // 3 bytes generan 4 caracteres base64
         byte[] buffer = new Byte[75];
-        using RandomNumberGenerator rng = RandomNumberGenerator.Create();
-        rng.GetNonZeroBytes(buffer);
+        using RandomNumberGenerator randomNumberGenerator = RandomNumberGenerator.Create();
+        randomNumberGenerator.GetNonZeroBytes(buffer);
         return Convert.ToBase64String(buffer);
     }
 }

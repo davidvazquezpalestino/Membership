@@ -4,8 +4,7 @@ internal class RegisterInteractor : IRegisterInputPort
     readonly IUserManagerService UserManagerService;
     readonly IValidator<UserDto> Validator;
 
-    public RegisterInteractor(IUserManagerService userManagerService,
-        IValidator<UserDto> validator)
+    public RegisterInteractor(IUserManagerService userManagerService, IValidator<UserDto> validator)
     {
         UserManagerService = userManagerService;
         Validator = validator;

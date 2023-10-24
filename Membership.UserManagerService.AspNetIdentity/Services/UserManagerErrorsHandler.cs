@@ -1,6 +1,4 @@
-﻿using Membership.Shared.ValueObjects;
-
-namespace Membership.UserManagerService.AspNetIdentity.Services;
+﻿namespace Membership.UserManagerService.AspNetIdentity.Services;
 internal class UserManagerErrorsHandler
 {
     readonly IMembershipMessageLocalizer Localizer;
