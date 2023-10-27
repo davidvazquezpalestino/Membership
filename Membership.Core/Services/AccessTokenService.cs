@@ -15,8 +15,7 @@ internal class AccessTokenService : IAccessTokenService
     {
         byte[] key = Encoding.UTF8.GetBytes(JwtOptions.SecurityKey);
         SymmetricSecurityKey secret = new SymmetricSecurityKey(key);
-        SigningCredentials signingCredentials = new SigningCredentials(secret,
-            SecurityAlgorithms.HmacSha256);
+        SigningCredentials signingCredentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
 
         JwtSecurityToken tokenOptions = new JwtSecurityToken(
             issuer: JwtOptions.ValidIssuer,
